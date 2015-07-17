@@ -71,7 +71,7 @@ public class SocketManager {
         return mSocketManager;
     }
 
-    public SocketManager sendMessage(final String event, final Object[] args, final Ack ack) {
+    public SocketManager emitEvent(final String event, final Object[] args, final Ack ack) {
         if (hasSocketAvailable()) {
             mSocket.emit(event, args, ack);
         }

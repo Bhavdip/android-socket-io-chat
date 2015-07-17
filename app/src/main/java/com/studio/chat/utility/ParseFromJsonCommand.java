@@ -1,23 +1,33 @@
 package com.studio.chat.utility;
 
+import android.text.TextUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.List;
 
-public class ParseFromJsonCommand<ObjectType extends Object> {
-    private final String jsonString;
-    private final Class<ObjectType> classToDeserializeTo;
-    private ObjectMapper mObjectMapper = new ObjectMapper();
+public class ParseFromJsonCommand {
 
-    public ParseFromJsonCommand(String aJsonString, Class<ObjectType> aClassToDeserializeTo) {
-        jsonString = aJsonString;
-        classToDeserializeTo = aClassToDeserializeTo;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private String mJson;
+    private Class<?> classToDeserializeTo;
+
+    public ParseFromJsonCommand(String json, Class<?> target){
+            this.mJson = json;
+            this.classToDeserializeTo = target;
     }
 
-    public ObjectType execute() {
+    public <T> T buildJsonToPoJo() {
+        if(TextUtils.isEmpty(mJson)){
+            return null;
+        }
+
         try {
-            return mObjectMapper.readValue(jsonString, classToDeserializeTo);
+            return objectMapper.readValue(mJson, objectMapper.getTypeFactory().constructCollectionType(List.class, Class.forName(classToDeserializeTo.getName())));
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;

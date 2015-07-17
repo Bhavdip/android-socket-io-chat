@@ -10,44 +10,48 @@ import android.widget.TextView;
 import com.studio.chat.R;
 import com.studio.chat.model.Message;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
-    private List<Message> mMessages;
-    private int[] mUsernameColors;
+    private List<Message> mMessages = new ArrayList<>();
+    private Context mContext;
 
-    public MessageAdapter(Context context, List<Message> messages) {
-        mMessages = messages;
-        mUsernameColors = context.getResources().getIntArray(R.array.username_colors);
+    public MessageAdapter(Context context) {
+        mContext = context;
+    }
+
+    public Context getContext() {
+        return mContext;
+    }
+
+    public void addMessages(List<Message> messageList) {
+        mMessages.addAll(messageList);
+        notifyItemInserted(mMessages.size() - 1);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout = -1;
         switch (viewType) {
-        case Message.TYPE_MESSAGE:
-            layout = R.layout.item_message;
-            break;
-        case Message.TYPE_LOG:
-            layout = R.layout.item_log;
-            break;
-        case Message.TYPE_ACTION:
-            layout = R.layout.item_action;
-            break;
+            case Message.TYPE_MESSAGE:
+                layout = R.layout.item_message;
+                break;
+            case Message.TYPE_BLOG:
+                layout = R.layout.item_message;
+                break;
         }
-        View v = LayoutInflater
-                .from(parent.getContext())
-                .inflate(layout, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Message message = mMessages.get(position);
-        viewHolder.setMessage(message.getMessage());
-        viewHolder.setUsername(message.getUsername());
+        viewHolder.setMessage(message.getMsgText());
+        viewHolder.setUsername(message.getUserName());
     }
 
     @Override
@@ -57,7 +61,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        return mMessages.get(position).getType();
+        return mMessages.get(position).getMsgType();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -74,21 +78,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         public void setUsername(String username) {
             if (null == mUsernameView) return;
             mUsernameView.setText(username);
-            mUsernameView.setTextColor(getUsernameColor(username));
         }
 
         public void setMessage(String message) {
             if (null == mMessageView) return;
             mMessageView.setText(message);
-        }
-
-        private int getUsernameColor(String username) {
-            int hash = 7;
-            for (int i = 0, len = username.length(); i < len; i++) {
-                hash = username.codePointAt(i) + (hash << 5) - hash;
-            }
-            int index = Math.abs(hash % mUsernameColors.length);
-            return mUsernameColors[index];
         }
     }
 }

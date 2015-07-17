@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.studio.chat.utility.Constants;
@@ -25,6 +26,8 @@ import com.studio.chat.adapter.MessageAdapter;
 import com.studio.chat.R;
 import com.studio.chat.model.Message;
 import com.studio.chat.model.User;
+import com.studio.chat.utility.ParseFromJsonCommand;
+import com.studio.chat.utility.SocketManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,36 +37,25 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConvertationActivity extends Activity{
+public class ConvertationActivity extends Activity {
 
     public final static String TO_CONVERTATION_USER = "touser";
+
     public final static String FROM_CONVERATION_USER = "fromuser";
-    private static final int TYPING_TIMER_LENGTH = 600;
 
     private RecyclerView mMessagesView;
-    private RecyclerView.Adapter mAdapter;
-    private List<Message> mMessages = new ArrayList<>();
+    private MessageAdapter mAdapter;
     private String mUsername;
     private ObjectMapper mObjectMapper = new ObjectMapper();
-    private Handler mTypingHandler = new Handler();
     private EditText mInputMessageView;
-    private boolean mTyping = false;
     private User mUser;
-    private Socket mSocket;
-    {
-        try {
-            mSocket = IO.socket(Constants.CHAT_SERVER_URL);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
 
-        if(getIntent().getExtras() != null){
+        if (getIntent().getExtras() != null) {
             mUsername = getIntent().getExtras().getString(FROM_CONVERATION_USER);
             try {
                 mUser = mObjectMapper.readValue(getIntent().getExtras().getString(TO_CONVERTATION_USER), User.class);
@@ -72,7 +64,7 @@ public class ConvertationActivity extends Activity{
             }
         }
 
-        mAdapter = new MessageAdapter(getApplicationContext(), mMessages);
+        mAdapter = new MessageAdapter(getApplicationContext());
         mMessagesView = (RecyclerView) findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mMessagesView.setAdapter(mAdapter);
@@ -81,13 +73,14 @@ public class ConvertationActivity extends Activity{
         mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int id, KeyEvent event) {
-                if (id == R.id.send || id == EditorInfo.IME_NULL) {
+                if (id == R.id.send_button || id == EditorInfo.IME_NULL) {
                     attemptSend();
                     return true;
                 }
                 return false;
             }
         });
+
         mInputMessageView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -96,15 +89,6 @@ public class ConvertationActivity extends Activity{
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (null == mUsername) return;
-                if (!mSocket.connected()) return;
-
-                if (!mTyping) {
-                    mTyping = true;
-                    mSocket.emit("typing");
-                }
-
-                mTypingHandler.removeCallbacks(onTypingTimeout);
-                mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
             }
 
             @Override
@@ -120,32 +104,45 @@ public class ConvertationActivity extends Activity{
             }
         });
 
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on(Constants.NODE_MESSAGE, onNewMessage);
-        mSocket.on("typing", onTyping);
-        mSocket.on("stop typing", onStopTyping);
-        mSocket.connect();
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+
+        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
+        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onReceiveMessage);
+
+        SocketManager.getInstance().connect();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mSocket.disconnect();
-        mSocket.off(Constants.NODE_MESSAGE);
-        mSocket.off("typing");
-        mSocket.off("stop typing");
+        SocketManager.getInstance().listenOffAll();
+        SocketManager.getInstance().disconnect();
     }
 
-    private Runnable onTypingTimeout = new Runnable() {
-        @Override
-        public void run() {
-            if (!mTyping) return;
+    private void addAllMessage(List<Message> messages) {
+        mAdapter.addMessages(messages);
+        scrollToBottom();
+    }
 
-            mTyping = false;
-            mSocket.emit("stop typing");
+    private void scrollToBottom() {
+        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+    private void attemptSend() {
+        String message = mInputMessageView.getText().toString().trim();
+        if (TextUtils.isEmpty(message)) {
+            mInputMessageView.requestFocus();
+            return;
         }
-    };
+        // perform the sending message attempt.
+
+        SocketManager.getInstance().emitEvent(Constants.NODE_SEND_CHAT_MESSAGE,
+                mInputMessageView.getText(),
+                String.valueOf(mUser.getUserId()),"619","0",String.valueOf(0));
+        mInputMessageView.setText("");
+    }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
@@ -159,103 +156,37 @@ public class ConvertationActivity extends Activity{
         }
     };
 
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+    private Emitter.Listener onMessageSend = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String username = (String) args[0];
-                    String message = (String) args[1];
-                    removeTyping(username);
-                    addMessage(username, message);
-                }
-            });
         }
     };
 
-    private void addMessage(String username, String message) {
-        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
-                .username(username).message(message).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
-        scrollToBottom();
-    }
-
-
-    private void removeTyping(String username) {
-        for (int i = mMessages.size() - 1; i >= 0; i--) {
-            Message message = mMessages.get(i);
-            if (message.getType() == Message.TYPE_ACTION && message.getUsername().equals(username)) {
-                mMessages.remove(i);
-                mAdapter.notifyItemRemoved(i);
+    private Emitter.Listener onReceiveMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            String response = (String) args[0];
+            if(!TextUtils.isEmpty(response)){
+                List<Message> messages = new ParseFromJsonCommand(response,Message.class).buildJsonToPoJo();
+                if(messages != null && messages.size() > 0)
+                {
+                    addAllMessage(messages);
+                }
             }
         }
-    }
+    };
 
-    private void addTyping(String username) {
-        mMessages.add(new Message.Builder(Message.TYPE_ACTION).username(username).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
-        scrollToBottom();
-    }
-
-    private Emitter.Listener onTyping = new Emitter.Listener() {
+    private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
-        public void call(final Object... args) {
+        public void call(Object... args) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    addTyping(username);
+                    Toast.makeText(getApplicationContext(), R.string.message_connect, Toast.LENGTH_LONG).show();
                 }
             });
         }
     };
 
-    private Emitter.Listener onStopTyping = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    removeTyping(username);
-                }
-            });
-        }
-    };
 
-    private void scrollToBottom() {
-        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
-    }
-
-    private void attemptSend() {
-        if (null == mUsername) return;
-        if (!mSocket.connected()) return;
-
-        mTyping = false;
-
-        String message = mInputMessageView.getText().toString().trim();
-        if (TextUtils.isEmpty(message)) {
-            mInputMessageView.requestFocus();
-            return;
-        }
-
-        mInputMessageView.setText("");
-        addMessage(mUsername, message);
-
-        // perform the sending message attempt.
-        //mSocket.emit(Constants.NODE_MESSAGE, mUser.getUsername(),message);
-    }
 }

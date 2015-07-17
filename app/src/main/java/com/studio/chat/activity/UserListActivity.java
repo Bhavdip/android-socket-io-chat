@@ -13,9 +13,12 @@ import android.widget.TextView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.studio.chat.R;
+import com.studio.chat.utility.Constants;
+import com.studio.chat.utility.ParseFromJsonCommand;
 import com.studio.chat.utility.RecyclerItemClickListener;
 import com.studio.chat.adapter.UsersAdapter;
 import com.studio.chat.model.User;
+import com.studio.chat.utility.SocketManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,6 +83,13 @@ public class UserListActivity extends Activity{
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SocketManager.getInstance().listenOffAll();
+        SocketManager.getInstance().disconnect();
+    }
+
     public class RecyclerViewClickHandler implements RecyclerItemClickListener.OnItemClickListener {
         @Override
         public void onItemClick(View view, int position) {
@@ -102,15 +112,18 @@ public class UserListActivity extends Activity{
         if(TextUtils.isEmpty(jsonUsers)){
             return;
         }
-        try {
-            objectMapper = new ObjectMapper();
-            if(mUserList.size() > 0){
-                mUserList.clear();
-            }
-            mUserList = objectMapper.readValue(jsonUsers, TypeFactory.defaultInstance().constructCollectionType(List.class,User.class));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+//        try {
+//            objectMapper = new ObjectMapper();
+//            if(mUserList.size() > 0){
+//                mUserList.clear();
+//            }
+//            mUserList = objectMapper.readValue(jsonUsers, TypeFactory.defaultInstance().constructCollectionType(List.class,User.class));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        mUserList = new ParseFromJsonCommand(jsonUsers,User.class).buildJsonToPoJo();
 
         if(mUserList != null && mUserList.size() > 0)
         {

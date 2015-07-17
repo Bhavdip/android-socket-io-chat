@@ -6,4 +6,7 @@ public class Constants {
     public static final String NODE_LOGIN  = "login";
     public static final String NODE_ADD_USER = "add user";
     public static final String NODE_MESSAGE = "new message";
+    public static final String NODE_SEND_CHAT_MESSAGE = "chat message";
+    public static final String NODE_CHAT_RECEIVE = "chat receive";
+    public static final String NODE_CHAT_ACK = "chat ack";
 }
