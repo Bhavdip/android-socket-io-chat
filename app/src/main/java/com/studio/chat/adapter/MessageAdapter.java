@@ -1,4 +1,4 @@
-package com.studio.chat;
+package com.studio.chat.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.studio.chat.R;
+import com.studio.chat.model.Message;
 
 import java.util.List;
 
@@ -17,7 +20,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public MessageAdapter(Context context, List<Message> messages) {
         mMessages = messages;
-        mUsernameColors = context.getResources().getIntArray(com.github.nkzawa.socketio.chat.R.array.username_colors);
+        mUsernameColors = context.getResources().getIntArray(R.array.username_colors);
     }
 
     @Override
@@ -25,13 +28,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         int layout = -1;
         switch (viewType) {
         case Message.TYPE_MESSAGE:
-            layout = com.github.nkzawa.socketio.chat.R.layout.item_message;
+            layout = R.layout.item_message;
             break;
         case Message.TYPE_LOG:
-            layout = com.github.nkzawa.socketio.chat.R.layout.item_log;
+            layout = R.layout.item_log;
             break;
         case Message.TYPE_ACTION:
-            layout = com.github.nkzawa.socketio.chat.R.layout.item_action;
+            layout = R.layout.item_action;
             break;
         }
         View v = LayoutInflater
@@ -64,8 +67,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         public ViewHolder(View itemView) {
             super(itemView);
 
-            mUsernameView = (TextView) itemView.findViewById(com.github.nkzawa.socketio.chat.R.id.username);
-            mMessageView = (TextView) itemView.findViewById(com.github.nkzawa.socketio.chat.R.id.message);
+            mUsernameView = (TextView) itemView.findViewById(R.id.username);
+            mMessageView = (TextView) itemView.findViewById(R.id.message);
         }
 
         public void setUsername(String username) {

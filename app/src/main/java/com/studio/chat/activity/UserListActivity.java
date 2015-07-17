@@ -1,4 +1,4 @@
-package com.studio.chat;
+package com.studio.chat.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,6 +12,10 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.studio.chat.R;
+import com.studio.chat.utility.RecyclerItemClickListener;
+import com.studio.chat.adapter.UsersAdapter;
+import com.studio.chat.model.User;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,12 +42,12 @@ public class UserListActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(com.github.nkzawa.socketio.chat.R.layout.activity_users_list);
+        setContentView(R.layout.activity_users_list);
 
-        mTextViewUserName = (TextView)findViewById(com.github.nkzawa.socketio.chat.R.id.textview_userName);
+        mTextViewUserName = (TextView)findViewById(R.id.textview_userName);
         mTextViewUserName.setText("");
 
-        mUserListView = (RecyclerView) findViewById(com.github.nkzawa.socketio.chat.R.id.userlist);
+        mUserListView = (RecyclerView) findViewById(R.id.userlist);
         mUserListView.setLayoutManager(new LinearLayoutManager(this));
         mUserListView.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), new RecyclerViewClickHandler()));
 

@@ -1,4 +1,4 @@
-package com.studio.chat;
+package com.studio.chat.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.curioustechizen.ago.RelativeTimeTextView;
+import com.studio.chat.R;
+import com.studio.chat.model.User;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -30,7 +32,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(com.github.nkzawa.socketio.chat.R.layout.item_users, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_users, parent, false);
         return new ViewHolder(v);
     }
 
@@ -66,10 +68,10 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
 
         public ViewHolder(View itemView) {
             super(itemView);
-            mUsernameView = (TextView) itemView.findViewById(com.github.nkzawa.socketio.chat.R.id.username);
-            mUnreadMessage = (TextView) itemView.findViewById(com.github.nkzawa.socketio.chat.R.id.unreadmessage);
-            mLastMessage = (TextView) itemView.findViewById(com.github.nkzawa.socketio.chat.R.id.lastmessage);
-            mMessageTime = (RelativeTimeTextView) itemView.findViewById(com.github.nkzawa.socketio.chat.R.id.time);
+            mUsernameView = (TextView) itemView.findViewById(R.id.username);
+            mUnreadMessage = (TextView) itemView.findViewById(R.id.unreadmessage);
+            mLastMessage = (TextView) itemView.findViewById(R.id.lastmessage);
+            mMessageTime = (RelativeTimeTextView) itemView.findViewById(R.id.time);
         }
 
         public void setName(String username, String lastmessage, int unreadmessage, String time) {

@@ -1,4 +1,4 @@
-package com.studio.chat;
+package com.studio.chat.model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;

@@ -1,4 +1,4 @@
-package com.studio.chat;
+package com.studio.chat.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -20,6 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.studio.chat.utility.Constants;
+import com.studio.chat.adapter.MessageAdapter;
+import com.studio.chat.R;
+import com.studio.chat.model.Message;
+import com.studio.chat.model.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,7 +61,7 @@ public class ConvertationActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.github.nkzawa.socketio.chat.R.layout.fragment_main);
+        setContentView(R.layout.fragment_main);
 
         if(getIntent().getExtras() != null){
             mUsername = getIntent().getExtras().getString(FROM_CONVERATION_USER);
@@ -68,15 +73,15 @@ public class ConvertationActivity extends Activity{
         }
 
         mAdapter = new MessageAdapter(getApplicationContext(), mMessages);
-        mMessagesView = (RecyclerView) findViewById(com.github.nkzawa.socketio.chat.R.id.messages);
+        mMessagesView = (RecyclerView) findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mMessagesView.setAdapter(mAdapter);
 
-        mInputMessageView = (EditText) findViewById(com.github.nkzawa.socketio.chat.R.id.message_input);
+        mInputMessageView = (EditText) findViewById(R.id.message_input);
         mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int id, KeyEvent event) {
-                if (id == com.github.nkzawa.socketio.chat.R.id.send || id == EditorInfo.IME_NULL) {
+                if (id == R.id.send || id == EditorInfo.IME_NULL) {
                     attemptSend();
                     return true;
                 }
@@ -107,7 +112,7 @@ public class ConvertationActivity extends Activity{
             }
         });
 
-        ImageButton sendButton = (ImageButton) findViewById(com.github.nkzawa.socketio.chat.R.id.send_button);
+        ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -148,7 +153,7 @@ public class ConvertationActivity extends Activity{
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getApplicationContext(), com.github.nkzawa.socketio.chat.R.string.error_connect, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
                 }
             });
         }
