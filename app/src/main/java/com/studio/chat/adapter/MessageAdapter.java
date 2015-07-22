@@ -91,19 +91,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             TextView textViewMessage;
             if (message.getUserId() == Integer.parseInt(mUsername)) {
                 // left side ( Send the message)
-                (mItemView.findViewById(R.id.message_right)).setVisibility(View.GONE);
+                (mItemView.findViewById(R.id.message_right)).setVisibility(View.VISIBLE);
+                (mItemView.findViewById(R.id.message_left)).setVisibility(View.GONE);
+
+                textViewUserName = (TextView) mItemView.findViewById(R.id.receiver);
+                textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_right);
+                textViewMessage.setText(message.getMsgText());
+                textViewUserName.setText(message.getUserName());
+
+            } else {
+                // right side ( Receive the message)
                 (mItemView.findViewById(R.id.message_left)).setVisibility(View.VISIBLE);
+                (mItemView.findViewById(R.id.message_right)).setVisibility(View.GONE);
 
                 textViewUserName = (TextView) mItemView.findViewById(R.id.sender);
                 textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_left);
-                textViewMessage.setText(message.getMsgText());
-                textViewUserName.setText(message.getUserName());
-            } else {
-                // right side ( Receive the message)
-                (mItemView.findViewById(R.id.message_left)).setVisibility(View.GONE);
-                (mItemView.findViewById(R.id.message_right)).setVisibility(View.VISIBLE);
-                textViewUserName = (TextView) mItemView.findViewById(R.id.receiver);
-                textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_right);
                 textViewMessage.setText(message.getMsgText());
                 textViewUserName.setText(message.getUserName());
             }
