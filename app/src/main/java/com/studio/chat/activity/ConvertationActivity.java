@@ -1,6 +1,7 @@
 package com.studio.chat.activity;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -39,15 +41,17 @@ import java.util.List;
 
 public class ConvertationActivity extends Activity {
 
-    public final static String TO_CONVERTATION_USER = "touser";
+    public final String TAG = ConvertationActivity.class.getName();
 
-    public final static String FROM_CONVERATION_USER = "fromuser";
+    public final static String TO_CONVERSION_USER = "touser";
+    public final static String FROM_CONVERSION_USER = "fromuser";
 
+    private ObjectMapper mObjectMapper = new ObjectMapper();
     private RecyclerView mMessagesView;
     private MessageAdapter mAdapter;
     private String mUsername;
-    private ObjectMapper mObjectMapper = new ObjectMapper();
     private EditText mInputMessageView;
+    private TextView mTextview_userName;
     private User mUser;
 
     @Override
@@ -55,16 +59,24 @@ public class ConvertationActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
 
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
+        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onACKMessage);
+
+
         if (getIntent().getExtras() != null) {
-            mUsername = getIntent().getExtras().getString(FROM_CONVERATION_USER);
+            mUsername = getIntent().getExtras().getString(FROM_CONVERSION_USER);
+
             try {
-                mUser = mObjectMapper.readValue(getIntent().getExtras().getString(TO_CONVERTATION_USER), User.class);
+                mUser = mObjectMapper.readValue(getIntent().getExtras().getString(TO_CONVERSION_USER), User.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        mAdapter = new MessageAdapter(getApplicationContext());
+        mAdapter = new MessageAdapter(getApplicationContext(),mUsername);
         mMessagesView = (RecyclerView) findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mMessagesView.setAdapter(mAdapter);
@@ -81,21 +93,6 @@ public class ConvertationActivity extends Activity {
             }
         });
 
-        mInputMessageView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (null == mUsername) return;
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
         ImageButton sendButton = (ImageButton) findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,26 +101,51 @@ public class ConvertationActivity extends Activity {
             }
         });
 
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mTextview_userName = (TextView)findViewById(R.id.textview_userName);
+        mTextview_userName.setText(String.valueOf(mUsername));
+    }
 
-        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
-        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onReceiveMessage);
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
-        SocketManager.getInstance().connect();
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketManager.getInstance().listenOffAll();
-        SocketManager.getInstance().disconnect();
+        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT, onConnect);
+        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        SocketManager.getInstance().listenOff(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
+        SocketManager.getInstance().listenOff(Constants.NODE_CHAT_ACK, onACKMessage);
+
     }
 
-    private void addAllMessage(List<Message> messages) {
+    private void addAllMessage(final List<Message> messages) {
         mAdapter.addMessages(messages);
-        scrollToBottom();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+                scrollToBottom();
+            }
+        });
+    }
+
+    private void addSingleMessage(Message nwMessage){
+        mAdapter.addMessages(nwMessage);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+                scrollToBottom();
+            }
+        });
     }
 
     private void scrollToBottom() {
@@ -137,10 +159,15 @@ public class ConvertationActivity extends Activity {
             return;
         }
         // perform the sending message attempt.
-
-        SocketManager.getInstance().emitEvent(Constants.NODE_SEND_CHAT_MESSAGE,
-                mInputMessageView.getText(),
-                String.valueOf(mUser.getUserId()),"619","0",String.valueOf(0));
+        /*Message tempMessage= new Message.Builder()
+                .setMsgType(0)
+                .setThreadId(String.valueOf(mUser.getThreadId()))
+                .setUserId(Integer.parseInt(mUsername))
+                .setMsgText(message)
+                .setUserName(mUsername)
+                .build();
+        addSingleMessage(tempMessage);*/
+        SocketManager.getInstance().emitEvent(Constants.NODE_SEND_CHAT_MESSAGE, mInputMessageView.getText(), String.valueOf(mUser.getUserId()), mUsername, "0", String.valueOf(mUser.getThreadId()));
         mInputMessageView.setText("");
     }
 
@@ -150,7 +177,7 @@ public class ConvertationActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Receive Message");
                 }
             });
         }
@@ -166,15 +193,30 @@ public class ConvertationActivity extends Activity {
         @Override
         public void call(final Object... args) {
             String response = (String) args[0];
-            if(!TextUtils.isEmpty(response)){
-                List<Message> messages = new ParseFromJsonCommand(response,Message.class).buildJsonToPoJo();
-                if(messages != null && messages.size() > 0)
-                {
+            if (!TextUtils.isEmpty(response)) {
+                List<Message> messages = new ParseFromJsonCommand(response, Message.class).buildList();
+                if (messages != null && messages.size() > 0) {
                     addAllMessage(messages);
+                    Log.d(TAG, "Receive Message");
                 }
             }
         }
     };
+
+    private Emitter.Listener onACKMessage = new Emitter.Listener() {
+
+        @Override
+        public void call(Object... args) {
+            String response = (String) args[0];
+            Log.d(TAG, "Ack Message");
+            List<Message> sendMessage = new ParseFromJsonCommand(response, Message.class).buildList();
+            if (sendMessage != null && sendMessage.size() > 0) {
+               addAllMessage(sendMessage);
+                Log.d(TAG, "Ack Message");
+            }
+        }
+    };
+
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
@@ -182,7 +224,7 @@ public class ConvertationActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getApplicationContext(), R.string.message_connect, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "conversation Activity");
                 }
             });
         }

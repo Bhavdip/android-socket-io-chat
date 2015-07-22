@@ -37,6 +37,11 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        SocketManager.getInstance().listenOn(Constants.NODE_LOGIN, onLogin);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username_input);
         mUsernameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -57,17 +62,12 @@ public class LoginActivity extends Activity {
                 attemptLogin();
             }
         });
-
-        SocketManager.getInstance().listenOn(Constants.NODE_LOGIN, onLogin);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        SocketManager.getInstance().connect();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
     }
 
     @Override
@@ -78,8 +78,10 @@ public class LoginActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketManager.getInstance().disconnect();
         SocketManager.getInstance().listenOff(Constants.NODE_LOGIN, onLogin);
+        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT, onConnect);
+        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
     }
 
     /**

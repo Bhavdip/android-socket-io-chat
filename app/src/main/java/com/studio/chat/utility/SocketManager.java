@@ -94,6 +94,7 @@ public class SocketManager {
 
     public SocketManager disconnect() {
         if (socketConnected()) {
+            mSocket.off();
             mSocket.disconnect();
         }
         return mSocketManager;

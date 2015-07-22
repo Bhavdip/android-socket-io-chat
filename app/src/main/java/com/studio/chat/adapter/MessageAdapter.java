@@ -2,6 +2,7 @@ package com.studio.chat.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +17,15 @@ import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
+    public final String TAG = MessageAdapter.class.getName();
+
     private List<Message> mMessages = new ArrayList<>();
     private Context mContext;
+    private String mUsername;
 
-    public MessageAdapter(Context context) {
+    public MessageAdapter(Context context, String me) {
         mContext = context;
+        this.mUsername = me;
     }
 
     public Context getContext() {
@@ -29,9 +34,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public void addMessages(List<Message> messageList) {
         mMessages.addAll(messageList);
-        notifyItemInserted(mMessages.size() - 1);
     }
-
+    public void addMessages(Message newMessage) {
+        mMessages.add(newMessage);
+    }
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout = -1;
@@ -40,7 +46,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 layout = R.layout.item_message;
                 break;
             case Message.TYPE_BLOG:
-                layout = R.layout.item_message;
+                layout = R.layout.item_blog;
                 break;
         }
         View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
@@ -49,9 +55,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Message message = mMessages.get(position);
-        viewHolder.setMessage(message.getMsgText());
-        viewHolder.setUsername(message.getUserName());
+        Log.d(TAG, String.format("onBindViewHolder"));
+        viewHolder.buildLayout(position);
     }
 
     @Override
@@ -65,24 +70,47 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView mUsernameView;
-        private TextView mMessageView;
+        private View mItemView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
-            mUsernameView = (TextView) itemView.findViewById(R.id.username);
-            mMessageView = (TextView) itemView.findViewById(R.id.message);
+            mItemView = itemView;
         }
 
-        public void setUsername(String username) {
-            if (null == mUsernameView) return;
-            mUsernameView.setText(username);
+        public void buildLayout(int msgPosition) {
+            Message message = mMessages.get(msgPosition);
+            if (message.getMsgType() == Message.TYPE_MESSAGE) {
+                prepareTextMsg(message);
+            } else {
+                prepareBlogMsg(message);
+            }
         }
 
-        public void setMessage(String message) {
-            if (null == mMessageView) return;
-            mMessageView.setText(message);
+        private void prepareTextMsg(Message message) {
+            TextView textViewUserName;
+            TextView textViewMessage;
+            if (message.getUserId() == Integer.parseInt(mUsername)) {
+                // left side ( Send the message)
+                (mItemView.findViewById(R.id.message_right)).setVisibility(View.GONE);
+                (mItemView.findViewById(R.id.message_left)).setVisibility(View.VISIBLE);
+
+                textViewUserName = (TextView) mItemView.findViewById(R.id.sender);
+                textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_left);
+                textViewMessage.setText(message.getMsgText());
+                textViewUserName.setText(message.getUserName());
+            } else {
+                // right side ( Receive the message)
+                (mItemView.findViewById(R.id.message_left)).setVisibility(View.GONE);
+                (mItemView.findViewById(R.id.message_right)).setVisibility(View.VISIBLE);
+                textViewUserName = (TextView) mItemView.findViewById(R.id.receiver);
+                textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_right);
+                textViewMessage.setText(message.getMsgText());
+                textViewUserName.setText(message.getUserName());
+            }
+        }
+
+        private void prepareBlogMsg(Message message) {
+
         }
     }
 }

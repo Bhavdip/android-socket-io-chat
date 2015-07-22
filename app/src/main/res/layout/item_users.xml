@@ -40,12 +40,12 @@
                 android:id="@+id/unreadmessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="20dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/username"
                 android:background="@drawable/drawable_unread_cirlce"
-                android:text="@string/dummy_unread_message"
                 android:gravity="center"
+                android:minWidth="20dp"
+                android:text="@string/dummy_unread_message"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -58,15 +58,15 @@
                 android:layout_centerVertical="true"
                 android:text="12220"
                 android:textColor="#CCCCCC"
-                android:textStyle="bold"
                 android:textSize="9sp"
-                />
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/lastmessage"
@@ -77,6 +77,17 @@
                 android:text="@string/app_name"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/userid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/drawable_unread_cirlce"
+                android:gravity="center"
+                android:minWidth="20dp"
+                android:textColor="#FFFFFF"
+                android:textSize="9sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
 

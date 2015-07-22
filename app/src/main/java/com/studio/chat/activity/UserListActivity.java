@@ -39,7 +39,6 @@ public class UserListActivity extends Activity{
     private String jsonUsers;
     private RecyclerView mUserListView;
     private UsersAdapter mUserAdapter;
-    private ObjectMapper objectMapper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,8 +85,6 @@ public class UserListActivity extends Activity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketManager.getInstance().listenOffAll();
-        SocketManager.getInstance().disconnect();
     }
 
     public class RecyclerViewClickHandler implements RecyclerItemClickListener.OnItemClickListener {
@@ -98,8 +95,8 @@ public class UserListActivity extends Activity{
                 try{
                     String json = objectMapper.writeValueAsString(mUserList.get(position));
                     Intent mIntent  = new Intent(getApplicationContext(), ConvertationActivity.class);
-                    mIntent.putExtra(ConvertationActivity.TO_CONVERTATION_USER, json);
-                    mIntent.putExtra(ConvertationActivity.FROM_CONVERATION_USER,mUsername);
+                    mIntent.putExtra(ConvertationActivity.TO_CONVERSION_USER, json);
+                    mIntent.putExtra(ConvertationActivity.FROM_CONVERSION_USER,mUsername);
                     startActivity(mIntent);
                 }catch (Exception e){}
 
@@ -112,18 +109,7 @@ public class UserListActivity extends Activity{
         if(TextUtils.isEmpty(jsonUsers)){
             return;
         }
-
-//        try {
-//            objectMapper = new ObjectMapper();
-//            if(mUserList.size() > 0){
-//                mUserList.clear();
-//            }
-//            mUserList = objectMapper.readValue(jsonUsers, TypeFactory.defaultInstance().constructCollectionType(List.class,User.class));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        mUserList = new ParseFromJsonCommand(jsonUsers,User.class).buildJsonToPoJo();
+        mUserList = new ParseFromJsonCommand(jsonUsers,User.class).buildList();
 
         if(mUserList != null && mUserList.size() > 0)
         {

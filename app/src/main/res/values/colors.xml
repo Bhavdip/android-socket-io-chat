@@ -9,10 +9,11 @@
     <color name="username5">#287b00</color>
     <color name="username6">#a8f07a</color>
     <color name="username7">#4ae8c4</color>
-    <color name="username8">#3b88eb</color>
+    <color name="username8">#A2C5D3</color>
     <color name="username9">#3824aa</color>
     <color name="username10">#a700ff</color>
     <color name="username11">#d300e7</color>
+    <color name="backgroundwhite">#FFFFFF</color>
 
     <array name="username_colors">
         <item>@color/username0</item>
@@ -28,5 +29,6 @@
         <item>@color/username10</item>
         <item>@color/username11</item>
     </array>
+
 
 </resources>

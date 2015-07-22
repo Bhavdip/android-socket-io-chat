@@ -35,7 +35,7 @@ public class User {
     @JsonProperty("user_name")
     private String userName;
     @JsonProperty("thread_id")
-    private Integer threadId;
+    private String threadId;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -139,7 +139,7 @@ public class User {
      * @return The threadId
      */
     @JsonProperty("thread_id")
-    public Integer getThreadId() {
+    public String getThreadId() {
         return threadId;
     }
 
@@ -147,7 +147,7 @@ public class User {
      * @param threadId The thread_id
      */
     @JsonProperty("thread_id")
-    public void setThreadId(Integer threadId) {
+    public void setThreadId(String threadId) {
         this.threadId = threadId;
     }
 

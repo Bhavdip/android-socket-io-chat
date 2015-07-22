@@ -12,6 +12,8 @@ import com.github.curioustechizen.ago.RelativeTimeTextView;
 import com.studio.chat.R;
 import com.studio.chat.model.User;
 
+import org.w3c.dom.Text;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,7 +41,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         User message = mUserList.get(position);
-        viewHolder.setName(message.getUserName(), message.getLastMsg(), message.getUnreadMsg(), message.getLastMsgTime());
+        viewHolder.buildUser(message);
     }
 
     @Override
@@ -65,6 +67,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         private TextView mUnreadMessage;
         private RelativeTimeTextView mMessageTime;
         private TextView mLastMessage;
+        private TextView mUserid;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -72,19 +75,20 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             mUnreadMessage = (TextView) itemView.findViewById(R.id.unreadmessage);
             mLastMessage = (TextView) itemView.findViewById(R.id.lastmessage);
             mMessageTime = (RelativeTimeTextView) itemView.findViewById(R.id.time);
+            mUserid = (TextView)itemView.findViewById(R.id.userid);
         }
 
-        public void setName(String username, String lastmessage, int unreadmessage, String time) {
-            mUsernameView.setText(username);
-            mUnreadMessage.setText(String.valueOf(unreadmessage));
-            mLastMessage.setText(lastmessage);
-
-            if (!TextUtils.isEmpty(time)) {
+        public void buildUser(User user){
+            mUserid.setText(String.valueOf(user.getUserId()));
+            mUsernameView.setText(user.getUserName());
+            mUnreadMessage.setText(String.valueOf(user.getUnreadMsg()));
+            mLastMessage.setText(user.getLastMsg());
+            if (!TextUtils.isEmpty(user.getLastMsgTime())) {
 
                 DateFormat format = new SimpleDateFormat("yyyy-mm-dd", Locale.JAPAN);
                 Date date = null;
                 try {
-                    date = format.parse(time);
+                    date = format.parse(user.getLastMsgTime());
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -92,8 +96,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             } else {
                 mMessageTime.setText("");
             }
-
-
         }
     }
 }
