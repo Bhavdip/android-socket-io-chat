@@ -23,4 +23,6 @@
     <string name="dummy_username">グーグル</string>
     <string name="dummy_unread_message">A</string>
     <string name="empty_user">No User</string>
+
+    <string name="dummy_message">123213113123123123123121231231233132232131\n131312312312\n12312312312\n12312312312323123\n312312312312\1312312312312</string>
 </resources>
