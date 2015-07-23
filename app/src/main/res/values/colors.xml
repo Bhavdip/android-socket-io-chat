@@ -14,8 +14,12 @@
     <color name="username10">#a700ff</color>
     <color name="username11">#d300e7</color>
     <color name="backgroundwhite">#FFFFFF</color>
+    <color name="color_gray">#CCCCCC</color>
+
     <color name="bubble_sender_color">#D5EBFF</color>
     <color name="bubble_receiver_color">#C7C6C6</color>
+
+    <color name="gray_horizontal_line">#CCCCCC</color>
 
     <array name="username_colors">
         <item>@color/username0</item>

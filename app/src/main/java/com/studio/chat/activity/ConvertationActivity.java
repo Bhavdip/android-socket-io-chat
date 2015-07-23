@@ -39,7 +39,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConvertationActivity extends Activity {
+public class ConvertationActivity extends BaseActivity {
 
     public final String TAG = ConvertationActivity.class.getName();
 

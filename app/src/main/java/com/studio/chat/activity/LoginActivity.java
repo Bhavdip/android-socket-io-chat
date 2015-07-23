@@ -25,7 +25,7 @@ import com.studio.chat.utility.SocketManager;
 /**
  * A login screen that offers login via username.
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity {
 
     private final String TAG = LoginActivity.class.getName();
     private EditText mUsernameView;

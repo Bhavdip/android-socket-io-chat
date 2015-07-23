@@ -17,33 +17,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- <LinearLayout
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:orientation="vertical">
+        <!-- Empty view -->
+        <include layout="@layout/item_emptyview_userlist" />
 
-             <ImageView
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:background="@drawable/ic_user" />
-
-             <TextView
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_gravity="center"
-                 android:text="@string/empty_user"
-                 android:textSize="14sp" />
-         </LinearLayout>-->
-
-
-        <android.support.v7.widget.RecyclerView
+        <com.studio.chat.utility.EmptyRecyclerView
             android:id="@+id/userlist"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
             android:scrollbarStyle="outsideOverlay"
             android:scrollbars="vertical" />
     </FrameLayout>

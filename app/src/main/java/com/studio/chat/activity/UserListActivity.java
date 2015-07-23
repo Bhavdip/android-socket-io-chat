@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.studio.chat.R;
 import com.studio.chat.utility.Constants;
+import com.studio.chat.utility.EmptyRecyclerView;
 import com.studio.chat.utility.ParseFromJsonCommand;
 import com.studio.chat.utility.RecyclerItemClickListener;
 import com.studio.chat.adapter.UsersAdapter;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UserListActivity extends Activity{
+public class UserListActivity extends BaseActivity{
 
     private final String TAG = UserListActivity.class.getName();
 
@@ -37,7 +38,7 @@ public class UserListActivity extends Activity{
     private TextView mTextViewUserName;
     private String mUsername;
     private String jsonUsers;
-    private RecyclerView mUserListView;
+    private EmptyRecyclerView mUserListView;
     private UsersAdapter mUserAdapter;
 
     @Override
@@ -49,12 +50,13 @@ public class UserListActivity extends Activity{
         mTextViewUserName = (TextView)findViewById(R.id.textview_userName);
         mTextViewUserName.setText("");
 
-        mUserListView = (RecyclerView) findViewById(R.id.userlist);
+        mUserListView = (EmptyRecyclerView) findViewById(R.id.userlist);
         mUserListView.setLayoutManager(new LinearLayoutManager(this));
         mUserListView.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), new RecyclerViewClickHandler()));
-
         mUserAdapter = new UsersAdapter(getApplicationContext());
         mUserListView.setAdapter(mUserAdapter);
+        // define the empty view
+        mUserListView.setEmptyView(findViewById(android.R.id.empty));
 
         startSignIn();
     }
