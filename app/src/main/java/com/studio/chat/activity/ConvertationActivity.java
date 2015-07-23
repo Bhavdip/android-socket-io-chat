@@ -64,7 +64,7 @@ public class ConvertationActivity extends Activity {
         SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
         SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onACKMessage);
-
+        SocketManager.getInstance().listenOn(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
 
         if (getIntent().getExtras() != null) {
             mUsername = getIntent().getExtras().getString(FROM_CONVERSION_USER);
@@ -76,7 +76,7 @@ public class ConvertationActivity extends Activity {
             }
         }
 
-        mAdapter = new MessageAdapter(getApplicationContext(),mUsername);
+        mAdapter = new MessageAdapter(getApplicationContext(), mUsername);
         mMessagesView = (RecyclerView) findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mMessagesView.setAdapter(mAdapter);
@@ -101,8 +101,11 @@ public class ConvertationActivity extends Activity {
             }
         });
 
-        mTextview_userName = (TextView)findViewById(R.id.textview_userName);
+        mTextview_userName = (TextView) findViewById(R.id.textview_userName);
         mTextview_userName.setText(String.valueOf(mUsername));
+
+        askUserChatHistory();
+
     }
 
     @Override
@@ -123,10 +126,25 @@ public class ConvertationActivity extends Activity {
         SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         SocketManager.getInstance().listenOff(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
         SocketManager.getInstance().listenOff(Constants.NODE_CHAT_ACK, onACKMessage);
+        SocketManager.getInstance().listenOff(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
+    }
 
+    private void askUserChatHistory(){
+        //thread_id, from_user, to_name
+        String threadId;
+        if(mUser.getThreadId() == null){
+            threadId = new String("0");
+        }else{
+            threadId =mUser.getThreadId();
+        }
+
+        //mdf6ia1nhfr, from_user(675) , to_user(664)
+        //SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,"mdf6ia1nhfr","664","675");
+        SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,threadId,mUsername,mUser.getUserId());
     }
 
     private void addAllMessage(final List<Message> messages) {
+        updateUserModel(messages.get(0).getThreadId());
         mAdapter.addMessages(messages);
         runOnUiThread(new Runnable() {
             @Override
@@ -137,7 +155,7 @@ public class ConvertationActivity extends Activity {
         });
     }
 
-    private void addSingleMessage(Message nwMessage){
+    private void addSingleMessage(Message nwMessage) {
         mAdapter.addMessages(nwMessage);
         runOnUiThread(new Runnable() {
             @Override
@@ -158,15 +176,6 @@ public class ConvertationActivity extends Activity {
             mInputMessageView.requestFocus();
             return;
         }
-        // perform the sending message attempt.
-        /*Message tempMessage= new Message.Builder()
-                .setMsgType(0)
-                .setThreadId(String.valueOf(mUser.getThreadId()))
-                .setUserId(Integer.parseInt(mUsername))
-                .setMsgText(message)
-                .setUserName(mUsername)
-                .build();
-        addSingleMessage(tempMessage);*/
         SocketManager.getInstance().emitEvent(Constants.NODE_SEND_CHAT_MESSAGE, mInputMessageView.getText(), String.valueOf(mUser.getUserId()), mUsername, "0", String.valueOf(mUser.getThreadId()));
         mInputMessageView.setText("");
     }
@@ -211,7 +220,7 @@ public class ConvertationActivity extends Activity {
             Log.d(TAG, "Ack Message");
             List<Message> sendMessage = new ParseFromJsonCommand(response, Message.class).buildList();
             if (sendMessage != null && sendMessage.size() > 0) {
-               addAllMessage(sendMessage);
+                addAllMessage(sendMessage);
                 Log.d(TAG, "Ack Message");
             }
         }
@@ -230,5 +239,23 @@ public class ConvertationActivity extends Activity {
         }
     };
 
+
+    private Emitter.Listener onChatUserHistory = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            String response = (String) args[0];
+            List<Message> sendMessage = new ParseFromJsonCommand(response, Message.class).buildList();
+            if (sendMessage != null && sendMessage.size() > 0) {
+                addAllMessage(sendMessage);
+                Log.d(TAG, "Listen Chat History");
+            }
+        }
+    };
+
+    private void updateUserModel(String threadId){
+        if(mUser != null){
+            mUser.setThreadId(threadId);
+        }
+    }
 
 }

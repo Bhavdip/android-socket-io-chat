@@ -1,5 +1,7 @@
 package com.studio.chat.model;
 
+import android.text.TextUtils;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -140,6 +142,9 @@ public class User {
      */
     @JsonProperty("thread_id")
     public String getThreadId() {
+        if(TextUtils.isEmpty(threadId)){
+            return "0";
+        }
         return threadId;
     }
 
