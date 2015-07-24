@@ -8,10 +8,11 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 public class SocketManager {
 
-    private final String TAG = SocketManager.class.getName();
+    private final String TAG = SocketManager.class.getSimpleName();
 
     private static String URI = Constants.CHAT_SERVER_URL;
     private static SocketManager mSocketManager;
@@ -57,6 +58,7 @@ public class SocketManager {
     public SocketManager listenOn(String event, Emitter.Listener fn) {
         if (hasSocketAvailable()) {
             mSocket.on(event, fn);
+            Log.d(TAG, String.format("Listen On# :[%s]", event));
         }
         return mSocketManager;
     }
@@ -84,7 +86,7 @@ public class SocketManager {
 
     public SocketManager emitEvent(final String event, final Object... args) {
         if (hasSocketAvailable()) {
-            Log.d(TAG,String.format("Event:[%s], Param:[%s]",event,args));
+            Log.d(TAG, String.format("Event:[%s], Param:[%s]", event, Arrays.toString(args)));
             mSocket.emit(event, args);
         }
         return mSocketManager;

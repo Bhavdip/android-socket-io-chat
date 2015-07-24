@@ -5,7 +5,7 @@
     <solid android:color="@android:color/white"></solid>
     <padding
         android:bottom="10dp"
-        android:left="10dp"
+        android:left="5dp"
         android:right="10dp"
         android:top="10dp"></padding>
 </shape>

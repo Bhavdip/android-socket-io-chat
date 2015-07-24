@@ -1,14 +1,9 @@
 package com.studio.chat.activity;
 
-import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -20,31 +15,28 @@ import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
-import com.studio.chat.utility.Constants;
-import com.studio.chat.adapter.MessageAdapter;
 import com.studio.chat.R;
+import com.studio.chat.adapter.MessageAdapter;
+import com.studio.chat.events.AskUserHistoryEvent;
+import com.studio.chat.events.ReceiveMsgEvent;
 import com.studio.chat.model.Message;
 import com.studio.chat.model.User;
-import com.studio.chat.utility.ParseFromJsonCommand;
+import com.studio.chat.utility.Constants;
 import com.studio.chat.utility.SocketManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class ConvertationActivity extends BaseActivity {
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
-    public final String TAG = ConvertationActivity.class.getName();
+public class ConversionActivity extends BaseActivity {
+
+    public final String TAG = ConversionActivity.class.getSimpleName();
 
     public final static String TO_CONVERSION_USER = "touser";
     public final static String FROM_CONVERSION_USER = "fromuser";
+
+    private EventBus mEventBus = EventBus.getDefault();
 
     private ObjectMapper mObjectMapper = new ObjectMapper();
     private RecyclerView mMessagesView;
@@ -58,13 +50,7 @@ public class ConvertationActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
-
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
-        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onACKMessage);
-        SocketManager.getInstance().listenOn(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
+        mEventBus.register(this);
 
         if (getIntent().getExtras() != null) {
             mUsername = getIntent().getExtras().getString(FROM_CONVERSION_USER);
@@ -105,7 +91,6 @@ public class ConvertationActivity extends BaseActivity {
         mTextview_userName.setText(String.valueOf(mUsername));
 
         askUserChatHistory();
-
     }
 
     @Override
@@ -120,27 +105,24 @@ public class ConvertationActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        mEventBus.unregister(this);
         super.onDestroy();
-        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        SocketManager.getInstance().listenOff(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
-        SocketManager.getInstance().listenOff(Constants.NODE_CHAT_ACK, onACKMessage);
-        SocketManager.getInstance().listenOff(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
     }
 
-    private void askUserChatHistory(){
+    private void askUserChatHistory() {
         //thread_id, from_user, to_name
         String threadId;
-        if(mUser.getThreadId() == null){
+        if (mUser.getThreadId() == null) {
             threadId = new String("0");
-        }else{
-            threadId =mUser.getThreadId();
+        } else {
+            threadId = mUser.getThreadId();
         }
 
-        //mdf6ia1nhfr, from_user(675) , to_user(664)
-        //SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,"mdf6ia1nhfr","664","675");
-        SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,threadId,mUsername,mUser.getUserId());
+        // fire event bus event to the service
+        // SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,threadId,mUsername,mUser.getUserId());
+        if (mEventBus != null) {
+            mEventBus.post(new AskUserHistoryEvent().setThreadId(threadId).setFromUserId(mUsername).setToUserID(String.valueOf(mUser.getUserId())));
+        }
     }
 
     private void addAllMessage(final List<Message> messages) {
@@ -180,80 +162,22 @@ public class ConvertationActivity extends BaseActivity {
         mInputMessageView.setText("");
     }
 
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "Receive Message");
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onMessageSend = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-        }
-    };
-
-    private Emitter.Listener onReceiveMessage = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            String response = (String) args[0];
-            if (!TextUtils.isEmpty(response)) {
-                List<Message> messages = new ParseFromJsonCommand(response, Message.class).buildList();
-                if (messages != null && messages.size() > 0) {
-                    addAllMessage(messages);
-                    Log.d(TAG, "Receive Message");
-                }
-            }
-        }
-    };
-
-    private Emitter.Listener onACKMessage = new Emitter.Listener() {
-
-        @Override
-        public void call(Object... args) {
-            String response = (String) args[0];
-            Log.d(TAG, "Ack Message");
-            List<Message> sendMessage = new ParseFromJsonCommand(response, Message.class).buildList();
-            if (sendMessage != null && sendMessage.size() > 0) {
-                addAllMessage(sendMessage);
+    @Subscribe
+    public void setOnReceiveMessage(ReceiveMsgEvent receiveMessage) {
+        if (receiveMessage.hasMessages()) {
+            if (receiveMessage.getMessageType() == 0) {
+                Log.d(TAG, "Chat Message");
+            } else if (receiveMessage.getMessageType() == 1) {
                 Log.d(TAG, "Ack Message");
+            } else {
+                Log.d(TAG, "Chat History Message");
             }
+            addAllMessage(receiveMessage.receiveMessages());
         }
-    };
+    }
 
-
-    private Emitter.Listener onConnect = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "conversation Activity");
-                }
-            });
-        }
-    };
-
-
-    private Emitter.Listener onChatUserHistory = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            String response = (String) args[0];
-            List<Message> sendMessage = new ParseFromJsonCommand(response, Message.class).buildList();
-            if (sendMessage != null && sendMessage.size() > 0) {
-                addAllMessage(sendMessage);
-                Log.d(TAG, "Listen Chat History");
-            }
-        }
-    };
-
-    private void updateUserModel(String threadId){
-        if(mUser != null){
+    private void updateUserModel(String threadId) {
+        if (mUser != null) {
             mUser.setThreadId(threadId);
         }
     }

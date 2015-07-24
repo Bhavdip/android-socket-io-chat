@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -9,16 +10,19 @@
         android:background="@drawable/drawable_white_board"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:src="@drawable/user" />
+        <com.github.siyamed.shapeimageview.mask.PorterShapeImageView
+            android:id="@+id/image_profile"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginRight="5dp"
+            app:siShape="@drawable/octogon"
+            app:siSquare="true" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <RelativeLayout

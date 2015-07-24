@@ -21,6 +21,8 @@
 
     <color name="gray_horizontal_line">#CCCCCC</color>
 
+    <color name="gray_user_name">#C7C6C6</color>
+
     <array name="username_colors">
         <item>@color/username0</item>
         <item>@color/username1</item>

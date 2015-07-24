@@ -1,6 +1,5 @@
 package com.studio.chat.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,22 +11,21 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.Socket;
-import com.studio.chat.utility.Constants;
 import com.studio.chat.R;
-import com.studio.chat.utility.SocketManager;
-
+import com.studio.chat.events.AddUserEvent;
+import com.studio.chat.events.UserLoginEvent;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
 /**
  * A login screen that offers login via username.
  */
 public class LoginActivity extends BaseActivity {
 
-    private final String TAG = LoginActivity.class.getName();
+    private final String TAG = LoginActivity.class.getSimpleName();
+
+    private EventBus mEventBus = EventBus.getDefault();
+
     private EditText mUsernameView;
     private Button mSignButton;
     private String mUsername;
@@ -36,12 +34,7 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        SocketManager.getInstance().listenOn(Constants.NODE_LOGIN, onLogin);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-
+        mEventBus.register(this);
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username_input);
         mUsernameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -77,11 +70,8 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        mEventBus.unregister(this);
         super.onDestroy();
-        SocketManager.getInstance().listenOff(Constants.NODE_LOGIN, onLogin);
-        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        SocketManager.getInstance().listenOff(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
     }
 
     /**
@@ -107,50 +97,32 @@ public class LoginActivity extends BaseActivity {
 
         mUsername = username;
 
-        // perform the user login attempt.
-        SocketManager.getInstance().emitEvent(Constants.NODE_ADD_USER, username);
+        emitAddUserEvent();
     }
 
-    private Emitter.Listener onLogin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            String result = (String) args[0];
+    /**
+     * Login web socket response will handle
+     * @param userLoginEvent
+     */
+    @Subscribe
+    public void onEvent(UserLoginEvent userLoginEvent) {
+        String result = userLoginEvent.getUserList();
+        if (!TextUtils.isEmpty(result)) {
+            Log.d(TAG, String.format("User List :%s", result));
             Intent intent = new Intent();
             intent.putExtra(UserListActivity.KEY_USER_NAME, mUsername);
             intent.putExtra(UserListActivity.KEY_JSON_USERS, result);
             setResult(RESULT_OK, intent);
             finish();
         }
-    };
+    }
 
-    private Emitter.Listener onConnect = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mUsernameView.setEnabled(true);
-                    mSignButton.setEnabled(true);
-                    Toast.makeText(getApplicationContext(), R.string.message_connect, Toast.LENGTH_LONG).show();
-                }
-            });
+    public void emitAddUserEvent(){
+        // perform the user login attempt.
+        if(mEventBus != null){
+            mEventBus.post(new AddUserEvent().setUserId(mUsername));
         }
-    };
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mUsernameView.setEnabled(false);
-                    mSignButton.setEnabled(false);
-                    Toast.makeText(getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    };
-
+    }
 }
 
 

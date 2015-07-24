@@ -10,7 +10,7 @@ public class Constants {
     public static final String NODE_CHAT_RECEIVE = "chat receive";
     public static final String NODE_CHAT_ACK = "chat ack";
 
-
     public static final String LISTEN_CHAT_USER_HISTORY = "return_user_history";
     public static final String EMIT_CHAT_USER_HISTORY = "ask_user_history";
+
 }

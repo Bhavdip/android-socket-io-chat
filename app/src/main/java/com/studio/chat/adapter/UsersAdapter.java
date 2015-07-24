@@ -6,9 +6,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.curioustechizen.ago.RelativeTimeTextView;
+import com.squareup.picasso.Picasso;
 import com.studio.chat.R;
 import com.studio.chat.model.User;
 
@@ -30,6 +32,10 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
 
     public UsersAdapter(Context context) {
         this.mContext = context;
+    }
+
+    public Context getApplicationContext(){
+        return  mContext;
     }
 
     @Override
@@ -68,6 +74,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         private RelativeTimeTextView mMessageTime;
         private TextView mLastMessage;
         private TextView mUserid;
+        private ImageView profileImageView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -76,6 +83,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             mLastMessage = (TextView) itemView.findViewById(R.id.lastmessage);
             mMessageTime = (RelativeTimeTextView) itemView.findViewById(R.id.time);
             mUserid = (TextView)itemView.findViewById(R.id.userid);
+            profileImageView = (ImageView)itemView.findViewById(R.id.image_profile);
         }
 
         public void buildUser(User user){
@@ -95,6 +103,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
                 mMessageTime.setReferenceTime(date.getTime());
             } else {
                 mMessageTime.setText("");
+            }
+
+            final Picasso picasso = Picasso.with(getApplicationContext());
+            picasso.setLoggingEnabled(true);
+            picasso.setIndicatorsEnabled(true);
+            if(!TextUtils.isEmpty(user.getProfilePic())){
+                picasso.load(user.getProfilePic()).placeholder(R.drawable.user).into(profileImageView);
             }
         }
     }

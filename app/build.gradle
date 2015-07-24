@@ -35,9 +35,18 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:21.0.+'
+    // recycle view that replace android list view
     compile 'com.android.support:recyclerview-v7:21.0.+'
+    // card view
     compile 'com.android.support:cardview-v7:21.0.+'
+    // socket io client
     compile 'com.github.nkzawa:socket.io-client:0.5.1'
+    // display the pretty good time ago
     compile 'com.github.curioustechizen.android-ago:library:1.3.0'
+    // for image shape
     compile 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
+    // for image downloading
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    // green event bus
+    compile 'de.greenrobot:eventbus:3.0.0-beta1'
 }
