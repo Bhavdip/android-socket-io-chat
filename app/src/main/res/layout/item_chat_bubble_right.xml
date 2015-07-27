@@ -25,7 +25,7 @@
             android:layout_marginRight="-2dp"
             android:layout_toLeftOf="@+id/textview_right_arrow"
             android:background="@drawable/drawble_right_round"
-            android:gravity="right"
+            android:gravity="left"
             android:minHeight="18dp"
             android:textColor="?android:textColorPrimary"
             android:textSize="12sp" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/message_left"
+    android:id="@+id/blog_left"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -17,11 +17,11 @@
             android:id="@+id/image_profile"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:siShape="@drawable/octogon"
             android:layout_gravity="top"
+            app:siShape="@drawable/octogon"
             app:siSquare="true" />
 
-        <include layout="@layout/item_chat_bubble_left"></include>
+        <include layout="@layout/item_blog_bubble_left"></include>
     </LinearLayout>
 
     <!-- Second Row -->

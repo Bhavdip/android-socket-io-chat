@@ -42,6 +42,20 @@ public class Message {
     private String userName;
     @JsonProperty("thread_id")
     private String threadId;
+    @JsonProperty("blog_id")
+    private String blogId;
+    @JsonProperty("category_id")
+    private String categoryId;
+    @JsonProperty("blog_title")
+    private String blogTitle;
+    @JsonProperty("blog_desc")
+    private String blogDesc;
+    @JsonProperty("blog_image")
+    private String blogImage;
+    @JsonProperty("msg_time")
+    private String msgTime;
+
+
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -173,6 +187,102 @@ public class Message {
         this.threadId = threadId;
     }
 
+    /**
+     * @return The blogId
+     */
+    @JsonProperty("blog_id")
+    public String getBlogId() {
+        return blogId;
+    }
+
+    /**
+     * @param blogId The blog_id
+     */
+    @JsonProperty("blog_id")
+    public void setBlogId(String blogId) {
+        this.blogId = blogId;
+    }
+
+    /**
+     * @return The categoryId
+     */
+    @JsonProperty("category_id")
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    /**
+     * @param categoryId The category_id
+     */
+    @JsonProperty("category_id")
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    /**
+     * @return The blogTitle
+     */
+    @JsonProperty("blog_title")
+    public String getBlogTitle() {
+        return blogTitle;
+    }
+
+    /**
+     * @param blogTitle The blog_title
+     */
+    @JsonProperty("blog_title")
+    public void setBlogTitle(String blogTitle) {
+        this.blogTitle = blogTitle;
+    }
+
+    /**
+     * @return The blogDesc
+     */
+    @JsonProperty("blog_desc")
+    public String getBlogDesc() {
+        return blogDesc;
+    }
+
+    /**
+     * @param blogDesc The blog_desc
+     */
+    @JsonProperty("blog_desc")
+    public void setBlogDesc(String blogDesc) {
+        this.blogDesc = blogDesc;
+    }
+
+    /**
+     * @return The blogImage
+     */
+    @JsonProperty("blog_image")
+    public String getBlogImage() {
+        return blogImage;
+    }
+
+    /**
+     * @param blogImage The blog_image
+     */
+    @JsonProperty("blog_image")
+    public void setBlogImage(String blogImage) {
+        this.blogImage = blogImage;
+    }
+
+    /**
+     * @return The msgTime
+     */
+    @JsonProperty("msg_time")
+    public String getMsgTime() {
+        return msgTime;
+    }
+
+    /**
+     * @param msgTime The msg_time
+     */
+    @JsonProperty("msg_time")
+    public void setMsgTime(String msgTime) {
+        this.msgTime = msgTime;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -185,65 +295,77 @@ public class Message {
 
     public static class Builder {
 
-        private Integer userId;
+        private Integer mUserId;
 
-        private String profilePic;
+        private String mProfilePic;
 
-        private String msgText;
+        private String mMsgText;
 
-        private Integer msgId;
+        private Integer mMsgId;
 
-        private Integer msgFlag;
+        private Integer mMsgFlag;
 
         private Integer msgType;
 
-        private String userName;
+        private String mUserName;
 
-        private String threadId;
+        private String mThreadId;
+
+        private String mBlogId;
+
+        private String mCategoryId;
+
+        private String mBlogTitle;
+
+        private String mBlogDesc;
+
+        private String mBlogImage;
+
+        private String mMsgTime;
 
 
         public Integer getUserId() {
-            return userId;
+            return mUserId;
         }
 
         public Builder setUserId(Integer userId) {
-            this.userId = userId;
+            this.mUserId = userId;
             return this;
         }
 
         public String getProfilePic() {
-            return profilePic;
+            return mProfilePic;
         }
 
         public Builder setProfilePic(String profilePic) {
-            this.profilePic = profilePic;
+            this.mProfilePic = profilePic;
             return this;
         }
 
         public String getMsgText() {
-            return msgText;
+            return mMsgText;
         }
 
         public Builder setMsgText(String msgText) {
-            this.msgText = msgText;
+            this.mMsgText = msgText;
             return this;
         }
 
         public Integer getMsgId() {
-            return msgId;
+            return mMsgId;
         }
 
         public Builder setMsgId(Integer msgId) {
-            this.msgId = msgId;
+            this.mMsgId = msgId;
             return this;
         }
 
         public Integer getMsgFlag() {
-            return msgFlag;
+            return mMsgFlag;
         }
 
         public Builder setMsgFlag(Integer msgFlag) {
-            this.msgFlag = msgFlag;
+            this.mMsgFlag = msgFlag;
             return this;
         }
 
@@ -257,33 +379,93 @@ public class Message {
         }
 
         public String getUserName() {
-            return userName;
+            return mUserName;
         }
 
         public Builder setUserName(String userName) {
-            this.userName = userName;
+            this.mUserName = userName;
             return this;
         }
 
         public String getThreadId() {
-            return threadId;
+            return mThreadId;
         }
 
         public Builder setThreadId(String threadId) {
-            this.threadId = threadId;
+            this.mThreadId = threadId;
+            return this;
+        }
+
+        public String getBlogId() {
+            return mBlogId;
+        }
+
+        public Builder setBlogId(String blogId) {
+            this.mBlogId = blogId;
+            return this;
+        }
+
+        public String getCategoryId() {
+            return mCategoryId;
+        }
+
+        public Builder setCategoryId(String categoryId) {
+            this.mCategoryId = categoryId;
+            return this;
+        }
+
+        public String getBlogTitle() {
+            return mBlogTitle;
+        }
+
+        public Builder setBlogTitle(String blogTitle) {
+            this.mBlogTitle = blogTitle;
+            return this;
+        }
+
+        public String getBlogImage() {
+            return mBlogImage;
+        }
+
+        public Builder setBlogImage(String blogImage) {
+            this.mBlogImage = blogImage;
+            return this;
+        }
+
+        public String getMsgTime() {
+            return mMsgTime;
+        }
+
+        public Builder setMsgTime(String msgTime) {
+            this.mMsgTime = msgTime;
+            return this;
+        }
+
+        public String getBlogDesc() {
+            return mBlogDesc;
+        }
+
+        public Builder setBlogDesc(String blogDesc) {
+            this.mBlogDesc = blogDesc;
             return this;
         }
 
         public Message build() {
             Message message = new Message();
-            message.userId = userId;
-            message.profilePic = profilePic;
-            message.msgText = msgText;
-            message.msgId = msgId;
-            message.msgFlag = msgFlag;
+            message.userId = mUserId;
+            message.profilePic = mProfilePic;
+            message.msgText = mMsgText;
+            message.msgId = mMsgId;
+            message.msgFlag = mMsgFlag;
             message.msgType = msgType;
-            message.userName = userName;
-            message.threadId = threadId;
+            message.userName = mUserName;
+            message.threadId = mThreadId;
+            message.blogId = mBlogId;
+            message.categoryId = mCategoryId;
+            message.blogTitle = mBlogTitle;
+            message.blogDesc = mBlogDesc;
+            message.blogImage = mBlogImage;
+            message.msgTime = mMsgTime;
             return message;
         }
     }

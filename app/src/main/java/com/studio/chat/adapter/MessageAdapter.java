@@ -38,9 +38,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void addMessages(List<Message> messageList) {
         mMessages.addAll(messageList);
     }
+
     public void addMessages(Message newMessage) {
         mMessages.add(newMessage);
     }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout = -1;
@@ -49,7 +51,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 layout = R.layout.item_message;
                 break;
             case Message.TYPE_BLOG:
-                layout = R.layout.item_blog;
+                layout = R.layout.item_message_blog;
                 break;
         }
         View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
@@ -93,37 +95,89 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             TextView textViewUserName;
             TextView textViewMessage;
             ImageView imageViewProfile;
-            if (message.getUserId() == Integer.parseInt(mUsername))
-            {
-                // left side ( Send the message)
+
+            if (message.getUserId() == Integer.parseInt(mUsername)) {
+                // right side ( Send the message)
                 (mItemView.findViewById(R.id.message_right)).setVisibility(View.VISIBLE);
                 (mItemView.findViewById(R.id.message_left)).setVisibility(View.GONE);
 
-                textViewUserName = (TextView) mItemView.findViewById(R.id.receiver);
+                textViewUserName = (TextView) mItemView.findViewById(R.id.sender);
                 textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_right);
+
                 textViewMessage.setText(message.getMsgText());
                 textViewUserName.setText(message.getUserName());
-            }
-            else
-            {
-                // right side ( Receive the message)
+            } else {
+                // Left side ( Receive the message)
                 (mItemView.findViewById(R.id.message_left)).setVisibility(View.VISIBLE);
                 (mItemView.findViewById(R.id.message_right)).setVisibility(View.GONE);
-                textViewUserName = (TextView) mItemView.findViewById(R.id.sender);
+
+                textViewUserName = (TextView) mItemView.findViewById(R.id.receiver);
                 textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_left);
                 textViewMessage.setText(message.getMsgText());
                 textViewUserName.setText(message.getUserName());
-                imageViewProfile = (ImageView)(mItemView.findViewById(R.id.image_profile));
+                imageViewProfile = (ImageView) (mItemView.findViewById(R.id.image_profile));
                 final Picasso picasso = Picasso.with(getApplicationContext());
                 picasso.setLoggingEnabled(true);
                 picasso.setIndicatorsEnabled(true);
-                if(!TextUtils.isEmpty(message.getProfilePic())){
+                if (!TextUtils.isEmpty(message.getProfilePic())) {
                     picasso.load(message.getProfilePic()).placeholder(R.drawable.user).into(imageViewProfile);
                 }
             }
         }
 
         private void prepareBlogMsg(Message message) {
+            ImageView imageViewProfile;
+            ImageView imageViewblog;
+            TextView txtusername;
+            TextView txtblogtitle;
+            TextView txtblogdesc;
+
+            final Picasso picasso = Picasso.with(getApplicationContext());
+            picasso.setLoggingEnabled(true);
+            picasso.setIndicatorsEnabled(true);
+
+            if (message.getUserId() == Integer.parseInt(mUsername)) {
+                // right side ( Send the message)
+                (mItemView.findViewById(R.id.blog_right)).setVisibility(View.VISIBLE);
+                (mItemView.findViewById(R.id.blog_left)).setVisibility(View.GONE);
+
+                txtusername = (TextView) mItemView.findViewById(R.id.sender);
+                txtblogtitle = (TextView) mItemView.findViewById(R.id.blog_title_right);
+                txtblogdesc = (TextView) mItemView.findViewById(R.id.blog_description_right);
+                imageViewblog = (ImageView) mItemView.findViewById(R.id.blog_profile_right);
+
+                txtusername.setText(message.getUserName());
+                txtblogtitle.setText(message.getBlogTitle());
+                txtblogdesc.setText(message.getBlogDesc());
+
+                if (!TextUtils.isEmpty(message.getBlogImage())) {
+                    picasso.load(message.getBlogImage()).placeholder(R.drawable.ic_launcher).into(imageViewblog);
+                }
+
+            } else {
+                // Left side ( Receive the message)
+                (mItemView.findViewById(R.id.blog_left)).setVisibility(View.VISIBLE);
+                (mItemView.findViewById(R.id.blog_right)).setVisibility(View.GONE);
+
+
+                txtusername = (TextView) mItemView.findViewById(R.id.receiver);
+                imageViewProfile = (ImageView) mItemView.findViewById(R.id.image_profile);
+                txtblogtitle = (TextView) mItemView.findViewById(R.id.blog_title_left);
+                txtblogdesc = (TextView) mItemView.findViewById(R.id.blog_description_left);
+                imageViewblog = (ImageView) mItemView.findViewById(R.id.blog_profile_left);
+
+                txtusername.setText(message.getUserName());
+                txtblogtitle.setText(message.getBlogTitle());
+                txtblogdesc.setText(message.getBlogDesc());
+
+                if (!TextUtils.isEmpty(message.getBlogImage())) {
+                    picasso.load(message.getBlogImage()).placeholder(R.drawable.ic_launcher).into(imageViewblog);
+                }
+
+                if (!TextUtils.isEmpty(message.getProfilePic())) {
+                    picasso.load(message.getProfilePic()).placeholder(R.drawable.user).into(imageViewProfile);
+                }
+            }
         }
     }
 }

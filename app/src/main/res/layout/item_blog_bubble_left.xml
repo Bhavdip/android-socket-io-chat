@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <!-- Left Arrow view -->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="-1dp">
+
+        <TextView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="-9dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/drawable_left_arrow" />
+    </RelativeLayout>
+
+    <!-- Message view -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.30"
+        android:background="@drawable/drawble_left_round"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/blog_title_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/dummy_middle_message"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/blog_profile_left"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
+
+        <TextView
+            android:id="@+id/blog_description_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:text="@string/dummy_middle_message"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="10dp"
+            android:paddingTop="16dp">
+
+            <TextView
+                android:id="@+id/blog_details_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="@string/dummy_middle_message"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="9sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- empty view -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.76"></LinearLayout>
+
+</LinearLayout>

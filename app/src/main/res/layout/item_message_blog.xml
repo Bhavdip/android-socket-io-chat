@@ -1,0 +1,10 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/spacing">
+
+    <include layout="@layout/item_message_blog_left"></include>
+
+    <include layout="@layout/item_message_blog_right"></include>
+</LinearLayout>

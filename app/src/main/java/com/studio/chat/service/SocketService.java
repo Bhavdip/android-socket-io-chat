@@ -148,6 +148,7 @@ public class SocketService extends Service {
         @Override
         public void call(final Object... args) {
             String response = (String) args[0];
+            Log.d(TAG, String.format("SocketService#Response[ReceiveMessage]: %s", response));
             if (!TextUtils.isEmpty(response)) {
                 mEventBus.post(new ReceiveMsgEvent().setMessageType(0).setResponse(response));
             }
@@ -159,6 +160,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             String response = (String) args[0];
+            Log.d(TAG, String.format("SocketService#Response[ACKMessage]: %s", response));
             if (!TextUtils.isEmpty(response)) {
                 mEventBus.post(new ReceiveMsgEvent().setMessageType(1).setResponse(response));
             }
@@ -169,6 +171,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             String response = (String) args[0];
+            Log.d(TAG, String.format("SocketService#Response[ChatUserHistory]: %s", response));
             if (!TextUtils.isEmpty(response)) {
                 mEventBus.post(new ReceiveMsgEvent().setMessageType(2).setResponse(response));
             }
