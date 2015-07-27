@@ -19,7 +19,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "msg_flag",
         "msg_type",
         "user_name",
-        "thread_id"
+        "thread_id",
+        "category_id",
+        "blog_id",
+        "blog_title",
+        "blog_desc",
+        "blog_image",
+        "msg_time"
 })
 public class Message {
 

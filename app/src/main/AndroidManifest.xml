@@ -30,6 +30,10 @@
             android:windowSoftInputMode="adjustResize|stateVisible" >
         </activity>
 
+        <activity android:name=".activity.BlogListActivity">
+
+        </activity>
+
         <service android:name=".service.SocketService"></service>
 
     </application>

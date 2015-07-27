@@ -23,9 +23,16 @@
     <string name="dummy_username">グーグル</string>
     <string name="dummy_unread_message">A</string>
     <string name="empty_user">NO USER</string>
+    <string name="empty_blog">NO BLOG AVAILABLE</string>
+
+    <string name="text_empty"></string>
 
     <string name="dummy_long_message">123213113123112321311312312312312312123123123313223213112321311312312312312312123123123313223213112321311312312312312312123123123313223213123123123121231231233132232131\n131312312312\n12312312312\n12312312312323123\n312312312312\1312312312312\n123213113123123123123121231231233132232131\n123213113123123123123121231231233132232131\n123213113123123123123121231231233132232131</string>
     <string name="dummy_short_message">Hi How r u ?</string>
     <string name="dummy_pritty_simple"> hi </string>
     <string name="dummy_middle_message">Hi How r u ? Have good day ahead?</string>
+
+
+    <string name="btn_blog_share">Share Blog</string>
+    <string name="btn_blog_details">Show Blog</string>
 </resources>

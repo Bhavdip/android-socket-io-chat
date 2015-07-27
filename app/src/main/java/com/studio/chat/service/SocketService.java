@@ -6,16 +6,16 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 import com.studio.chat.events.AddUserEvent;
+import com.studio.chat.events.AskUserBlogLike;
 import com.studio.chat.events.AskUserHistoryEvent;
 import com.studio.chat.events.ReceiveMsgEvent;
+import com.studio.chat.events.UserBlogLike;
 import com.studio.chat.events.UserLoginEvent;
 import com.studio.chat.utility.Constants;
 import com.studio.chat.utility.SocketManager;
-
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 
@@ -61,6 +61,10 @@ public class SocketService extends Service {
         SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onACKMessage);
 
         SocketManager.getInstance().listenOn(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
+
+        SocketManager.getInstance().listenOn(Constants.LISTEN_USER_BLOG_LIKE, onReturnUserBlogLike);
+
+        SocketManager.getInstance().listenOn(Constants.LISTEN_BOTH_USER_BLOG_LIKE, onBothUserBlogLike);
 
         SocketManager.getInstance().connect();
     }
@@ -178,19 +182,54 @@ public class SocketService extends Service {
         }
     };
 
-    /**
-     * @param addUserEvent
-     */
+    private Emitter.Listener onReturnUserBlogLike = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            String response = (String) args[0];
+            Log.d(TAG, String.format("SocketService#Response[Return_user_blog_like]: %s", response));
+            if (!TextUtils.isEmpty(response)) {
+                mEventBus.post(new UserBlogLike().setResponse(response).setForBothUser(false));
+            }
+        }
+    };
+
+    private Emitter.Listener onBothUserBlogLike = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            String response = (String) args[0];
+            Log.d(TAG, String.format("SocketService#Response[return_bothuser_blog_like]: %s", response));
+            if (!TextUtils.isEmpty(response)) {
+                mEventBus.post(new UserBlogLike().setResponse(response).setForBothUser(true));
+            }
+        }
+    };
+
     @Subscribe
-    public void onAddUserEvent(AddUserEvent addUserEvent) {
+    public void askAddUserEvent(AddUserEvent userEvent) {
         Log.d(TAG, "SocketService#Emit#onAddUserEvent");
-        SocketManager.getInstance().emitEvent(Constants.NODE_ADD_USER, addUserEvent.getUserId());
+        SocketManager.getInstance().emitEvent(Constants.NODE_ADD_USER, userEvent.getUserId());
     }
 
     @Subscribe
-    public void onAskChatHistory(AskUserHistoryEvent ask) {
+    public void askChatHistory(AskUserHistoryEvent userHistoryEvent) {
         Log.d(TAG, "SocketService#Emit#onAskChatHistory");
         // event, from user id, to user id
-        SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY, ask.getThreadId(), ask.getFromUserId(), ask.getToUserID());
+        SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY, userHistoryEvent.getThreadId(), userHistoryEvent.getFromUserId(), userHistoryEvent.getToUserID());
     }
+
+    @Subscribe
+    public void askBlogLikeByUser(AskUserBlogLike userBlogLike){
+        if(!TextUtils.isEmpty(userBlogLike.getFromUserId())){
+            if(!userBlogLike.isForBothUser()){
+                Log.d(TAG, "SocketService#Emit#askSingleUserBlogLike");
+                SocketManager.getInstance().emitEvent(Constants.EMIT_USER_BLOG_LIKE, userBlogLike.getFromUserId());
+            }else{
+                Log.d(TAG, "SocketService#Emit#askBothUserBlogLike");
+                SocketManager.getInstance().emitEvent(Constants.EMIT_BOTH_USER_BLOG_LIKE, userBlogLike.getFromUserId(),userBlogLike.getToUserId());
+            }
+
+        }
+    }
+
+
 }

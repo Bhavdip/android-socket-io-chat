@@ -9,7 +9,6 @@ import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
-
 public class SocketManager {
 
     private final String TAG = SocketManager.class.getSimpleName();
@@ -34,77 +33,37 @@ public class SocketManager {
     private SocketManager() {
     }
 
-    private boolean hasSocketAvailable() {
-        if (mSocket != null) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean socketConnected() {
-        if (hasSocketAvailable()) {
-            if (mSocket.connected()) {
-                return true;
-            }
-            return false;
-        }
-        return false;
-    }
-
     public static SocketManager getInstance() {
         return mSocketManager;
     }
 
     public SocketManager listenOn(String event, Emitter.Listener fn) {
-        if (hasSocketAvailable()) {
-            mSocket.on(event, fn);
-            Log.d(TAG, String.format("Listen On# :[%s]", event));
-        }
-        return mSocketManager;
-    }
-
-    public SocketManager listenOff(String event, Emitter.Listener fn) {
-        if (hasSocketAvailable()) {
-            mSocket.off(event, fn);
-        }
-        return mSocketManager;
-    }
-
-    public SocketManager listenOffAll() {
-        if (hasSocketAvailable()) {
-            mSocket.off();
-        }
+        mSocket.on(event, fn);
+        Log.d(TAG, String.format("Listen On# :[%s]", event));
         return mSocketManager;
     }
 
     public SocketManager emitEvent(final String event, final Object[] args, final Ack ack) {
-        if (hasSocketAvailable()) {
-            mSocket.emit(event, args, ack);
-        }
+        mSocket.emit(event, args, ack);
         return mSocketManager;
     }
 
     public SocketManager emitEvent(final String event, final Object... args) {
-        if (hasSocketAvailable()) {
-            Log.d(TAG, String.format("Event:[%s], Param:[%s]", event, Arrays.toString(args)));
-            mSocket.emit(event, args);
-        }
+        Log.d(TAG, String.format("Event:[%s], Param:[%s]", event, Arrays.toString(args)));
+        mSocket.emit(event, args);
         return mSocketManager;
     }
 
     public SocketManager connect() {
-        if (!socketConnected()) {
-            mSocket.connect();
-        }
+        mSocket.connect();
         return mSocketManager;
     }
 
     public SocketManager disconnect() {
-        if (socketConnected()) {
-            mSocket.off();
-            mSocket.disconnect();
-        }
+        mSocket.off();
+        mSocket.disconnect();
         return mSocketManager;
     }
 
 }
+

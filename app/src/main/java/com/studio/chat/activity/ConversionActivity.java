@@ -1,5 +1,7 @@
 package com.studio.chat.activity;
 
+import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +24,7 @@ import com.studio.chat.events.ReceiveMsgEvent;
 import com.studio.chat.model.Message;
 import com.studio.chat.model.User;
 import com.studio.chat.utility.Constants;
+import com.studio.chat.utility.Prefrence;
 import com.studio.chat.utility.SocketManager;
 import java.io.IOException;
 import java.util.List;
@@ -45,6 +48,8 @@ public class ConversionActivity extends BaseActivity {
     private EditText mInputMessageView;
     private TextView mTextview_userName;
     private User mUser;
+    private ImageButton mShare_blog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +65,9 @@ public class ConversionActivity extends BaseActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Prefrence.updateCurrentUser(getApplicationContext(),mUsername);
+            Prefrence.updateSelectUser(getApplicationContext(), String.valueOf(mUser.getUserId()));
         }
-
         mAdapter = new MessageAdapter(getApplicationContext(), mUsername);
         mMessagesView = (RecyclerView) findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -90,6 +96,14 @@ public class ConversionActivity extends BaseActivity {
         mTextview_userName = (TextView) findViewById(R.id.textview_userName);
         mTextview_userName.setText(String.valueOf(mUsername));
 
+
+        mShare_blog = (ImageButton)findViewById(R.id.share_blog);
+        mShare_blog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),BlogListActivity.class));
+            }
+        });
         askUserChatHistory();
     }
 
