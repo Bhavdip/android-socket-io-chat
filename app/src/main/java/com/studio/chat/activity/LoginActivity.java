@@ -111,12 +111,13 @@ public class LoginActivity extends BaseActivity {
         String result = userLoginEvent.getUserList();
         if (!TextUtils.isEmpty(result)) {
             Log.d(TAG, String.format("User List :%s", result));
-            Prefrence.updateCurrentUser(getApplicationContext(), mUsername);
             Intent intent = new Intent();
             intent.putExtra(UserListActivity.KEY_USER_NAME, mUsername);
             intent.putExtra(UserListActivity.KEY_JSON_USERS, result);
             setResult(RESULT_OK, intent);
             finish();
+        }else{
+
         }
     }
 

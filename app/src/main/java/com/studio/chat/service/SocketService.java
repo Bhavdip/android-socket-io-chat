@@ -6,16 +6,20 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 import com.studio.chat.events.AddUserEvent;
 import com.studio.chat.events.AskUserBlogLike;
 import com.studio.chat.events.AskUserHistoryEvent;
 import com.studio.chat.events.ReceiveMsgEvent;
+import com.studio.chat.events.SendChatEvent;
 import com.studio.chat.events.UserBlogLike;
 import com.studio.chat.events.UserLoginEvent;
 import com.studio.chat.utility.Constants;
+import com.studio.chat.utility.Prefrence;
 import com.studio.chat.utility.SocketManager;
+
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 
@@ -33,54 +37,68 @@ public class SocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         Log.d(TAG, "SocketService#onCreate");
-
         mEventBus.register(this);
-
         Log.d(TAG, "SocketService#EventBus#Register");
+        initializationSocket();
+    }
 
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectionTimeOut);
-        SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectionError);
-        SocketManager.getInstance().listenOn(Socket.EVENT_DISCONNECT, onDisconnect);
+    public void initializationSocket() {
+        if (!TextUtils.isEmpty(getCurrentUserID()))
+        {
+            Log.d(TAG, "SocketService#initializationSocket#SUCSSFULL");
 
-        SocketManager.getInstance().listenOn(Socket.EVENT_RECONNECT, onReconnect);
-        SocketManager.getInstance().listenOn(Socket.EVENT_RECONNECT_ERROR, onReconnectError);
+            SocketManager.getInstance().openSocket(getApplicationContext());
 
-        SocketManager.getInstance().listenOn(Socket.EVENT_ERROR, onEventError);
+            SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT, onConnect);
+            SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_TIMEOUT, onConnectionTimeOut);
+            SocketManager.getInstance().listenOn(Socket.EVENT_CONNECT_ERROR, onConnectionError);
+            SocketManager.getInstance().listenOn(Socket.EVENT_DISCONNECT, onDisconnect);
 
-        /**
-         *  webservice socket listen node
-         *
-         */
-        SocketManager.getInstance().listenOn(Constants.NODE_LOGIN, onLogin);
+            SocketManager.getInstance().listenOn(Socket.EVENT_RECONNECT, onReconnect);
+            SocketManager.getInstance().listenOn(Socket.EVENT_RECONNECT_ERROR, onReconnectError);
 
-        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
+            SocketManager.getInstance().listenOn(Socket.EVENT_ERROR, onEventError);
 
-        SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onACKMessage);
+            /**
+             *  webservice socket listen node
+             *
+             */
+            SocketManager.getInstance().listenOn(Constants.NODE_LOGIN, onLogin);
 
-        SocketManager.getInstance().listenOn(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
+            SocketManager.getInstance().listenOn(Constants.NODE_CHAT_RECEIVE, onReceiveMessage);
 
-        SocketManager.getInstance().listenOn(Constants.LISTEN_USER_BLOG_LIKE, onReturnUserBlogLike);
+            SocketManager.getInstance().listenOn(Constants.NODE_CHAT_ACK, onACKMessage);
 
-        SocketManager.getInstance().listenOn(Constants.LISTEN_BOTH_USER_BLOG_LIKE, onBothUserBlogLike);
+            SocketManager.getInstance().listenOn(Constants.LISTEN_CHAT_USER_HISTORY, onChatUserHistory);
 
-        SocketManager.getInstance().connect();
+            SocketManager.getInstance().listenOn(Constants.LISTEN_USER_BLOG_LIKE, onReturnUserBlogLike);
+
+            SocketManager.getInstance().listenOn(Constants.LISTEN_BOTH_USER_BLOG_LIKE, onBothUserBlogLike);
+
+            SocketManager.getInstance().connect();
+        }else{
+            Log.d(TAG, "SocketService#initializationSocket#FAIL");
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         SocketManager.getInstance().disconnect();
-
         Log.d(TAG, "SocketService#EventBus#UnRegister");
         mEventBus.unregister(this);
-
         Log.d(TAG, "SocketService#onDestroy");
     }
 
+    public String getCurrentUserID() {
+        String userId = Prefrence.getCurrentUser(getApplicationContext(), null);
+        if (!TextUtils.isEmpty(userId)) {
+            return userId;
+        }
+        Log.d(TAG, String.format("SocketService#FetCurrentUserID#%s", userId));
+        return null;
+    }
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
@@ -102,7 +120,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             // socket connection listener
-            Log.d(TAG, "SocketService#onConnectionError");
+            Log.d(TAG, String.format("SocketService#onConnectionError#%s",args));
         }
     };
 
@@ -110,7 +128,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             // Socket connection error listener
-            Log.d(TAG, "SocketService#onDisconnect");
+            Log.d(TAG, String.format("SocketService#onDisconnect#%s",args));
         }
     };
 
@@ -118,7 +136,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             // Socket connection error listener
-            Log.d(TAG, "SocketService#onReconnect");
+            Log.d(TAG, String.format("SocketService#onReconnect#%s",args));
         }
     };
 
@@ -126,7 +144,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             // Socket connection error listener
-            Log.d(TAG, "SocketService#onReconnect#Error");
+            Log.d(TAG, String.format("SocketService#onReconnect#Error%s",args));
         }
     };
 
@@ -134,7 +152,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             // Socket connection error listener
-            Log.d(TAG, "SocketService#onEventError");
+            Log.d(TAG, String.format("SocketService#onEventError%s", args));
         }
     };
 
@@ -205,8 +223,22 @@ public class SocketService extends Service {
     };
 
     @Subscribe
+    public void sendChatMessage(SendChatEvent sendChatEvent){
+        Log.d(TAG, String.format("SocketService#Emit#sendChatMessage[FmId:%s],[ToId:%s]",
+                sendChatEvent.getFromUserId(),sendChatEvent.getToUserId()));
+
+        SocketManager.getInstance().emitEvent(Constants.NODE_SEND_CHAT_MESSAGE,
+                sendChatEvent.getMessage(),
+                sendChatEvent.getFromUserId(),
+                sendChatEvent.getToUserId(), sendChatEvent.getMsgType(),sendChatEvent.getThreadId());
+    }
+
+    @Subscribe
     public void askAddUserEvent(AddUserEvent userEvent) {
         Log.d(TAG, "SocketService#Emit#onAddUserEvent");
+        Prefrence.updateCurrentUser(getApplicationContext(), userEvent.getUserId());
+        Log.d(TAG, String.format("SocketService#Emit#Prefrence.updateCurrentUser#%s", userEvent.getUserId()));
+        initializationSocket();
         SocketManager.getInstance().emitEvent(Constants.NODE_ADD_USER, userEvent.getUserId());
     }
 
@@ -218,14 +250,14 @@ public class SocketService extends Service {
     }
 
     @Subscribe
-    public void askBlogLikeByUser(AskUserBlogLike userBlogLike){
-        if(!TextUtils.isEmpty(userBlogLike.getFromUserId())){
-            if(!userBlogLike.isForBothUser()){
+    public void askBlogLikeByUser(AskUserBlogLike userBlogLike) {
+        if (!TextUtils.isEmpty(userBlogLike.getFromUserId())) {
+            if (!userBlogLike.isForBothUser()) {
                 Log.d(TAG, "SocketService#Emit#askSingleUserBlogLike");
                 SocketManager.getInstance().emitEvent(Constants.EMIT_USER_BLOG_LIKE, userBlogLike.getFromUserId());
-            }else{
+            } else {
                 Log.d(TAG, "SocketService#Emit#askBothUserBlogLike");
-                SocketManager.getInstance().emitEvent(Constants.EMIT_BOTH_USER_BLOG_LIKE, userBlogLike.getFromUserId(),userBlogLike.getToUserId());
+                SocketManager.getInstance().emitEvent(Constants.EMIT_BOTH_USER_BLOG_LIKE, userBlogLike.getFromUserId(), userBlogLike.getToUserId());
             }
 
         }

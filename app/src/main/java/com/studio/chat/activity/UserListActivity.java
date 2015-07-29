@@ -81,6 +81,8 @@ public class UserListActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        //Prefrence.updateCurrentUser(getApplicationContext(), null);
+        Log.d(TAG, "BaseActivity#updateCurrentUser#null");
         super.onDestroy();
     }
 

@@ -1,23 +1,33 @@
 package com.studio.chat.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.studio.chat.R;
+import com.studio.chat.events.BlogShareEvent;
 import com.studio.chat.fragment.BothUserFragment;
 import com.studio.chat.fragment.UserBlogFragment;
+
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
 public class BlogListActivity extends BaseActivity {
 
     private final String TAG = BlogListActivity.class.getName();
+
+    public final static String INTENT_BLOG_ID = "INTENT_BLOG_ID";
+
     private PagerSlidingTabStrip mPagerSlidingTabStrip;
     private ViewPager mViewPager;
     private BlogListAdapter mBlogListAdapter;
+    private EventBus mEventBus = EventBus.getDefault();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +46,29 @@ public class BlogListActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "BLogListActivity#onResume");
+        mEventBus.register(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "BLogListActivity#onPause");
+        mEventBus.unregister(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "BLogListActivity#onDestroy");
+    }
+
+    @Subscribe
+    public void onBlogShareEvent(BlogShareEvent blogShareEvent){
+        Log.d(TAG, String.format("BlogListActivity#BlogShareEvent#%s", blogShareEvent.getmBlogs().getBlogId()));
+        Intent bundleIntent = new Intent();
+        bundleIntent.putExtra(INTENT_BLOG_ID,blogShareEvent.getmBlogs().getBlogId());
+        setResult(RESULT_OK,bundleIntent);
+        finish();
     }
 
     public class BlogListAdapter extends FragmentPagerAdapter {
