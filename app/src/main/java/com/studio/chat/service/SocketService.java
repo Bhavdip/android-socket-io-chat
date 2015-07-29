@@ -6,7 +6,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 import com.studio.chat.events.AddUserEvent;
@@ -19,7 +18,6 @@ import com.studio.chat.events.UserLoginEvent;
 import com.studio.chat.utility.Constants;
 import com.studio.chat.utility.Prefrence;
 import com.studio.chat.utility.SocketManager;
-
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 
@@ -244,9 +242,13 @@ public class SocketService extends Service {
 
     @Subscribe
     public void askChatHistory(AskUserHistoryEvent userHistoryEvent) {
-        Log.d(TAG, "SocketService#Emit#onAskChatHistory");
+        Log.d(TAG, String.format("SocketService#Emit#onAskChatHistory[Offset:%s]",userHistoryEvent.getOffset()));
         // event, from user id, to user id
-        SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY, userHistoryEvent.getThreadId(), userHistoryEvent.getFromUserId(), userHistoryEvent.getToUserID());
+        SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,
+                userHistoryEvent.getThreadId(),
+                userHistoryEvent.getFromUserId(),
+                userHistoryEvent.getToUserID(),
+                userHistoryEvent.getOffset());
     }
 
     @Subscribe

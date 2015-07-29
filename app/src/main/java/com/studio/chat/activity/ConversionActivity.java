@@ -3,6 +3,7 @@ package com.studio.chat.activity;
 import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -29,6 +30,7 @@ import com.studio.chat.utility.Prefrence;
 import com.studio.chat.utility.SocketManager;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -44,8 +46,10 @@ public class ConversionActivity extends BaseActivity {
     public final static String FROM_CONVERSION_USER = "fromuser";
 
     private EventBus mEventBus = EventBus.getDefault();
-
+    private LinearLayoutManager mLinearLayoutManager;
     private ObjectMapper mObjectMapper = new ObjectMapper();
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mMessagesView;
     private MessageAdapter mAdapter;
     private String mUsername;
@@ -53,6 +57,7 @@ public class ConversionActivity extends BaseActivity {
     private TextView mTextview_userName;
     private User mUser;
     private ImageButton mShare_blog;
+    private int offsetcounter = 0;
 
 
     @Override
@@ -73,7 +78,8 @@ public class ConversionActivity extends BaseActivity {
         }
         mAdapter = new MessageAdapter(getApplicationContext(), mUsername);
         mMessagesView = (RecyclerView) findViewById(R.id.messages);
-        mMessagesView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        mLinearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mMessagesView.setLayoutManager(mLinearLayoutManager);
         mMessagesView.setAdapter(mAdapter);
 
         mInputMessageView = (EditText) findViewById(R.id.message_input);
@@ -107,6 +113,10 @@ public class ConversionActivity extends BaseActivity {
                 startActivityForResult(new Intent(getApplicationContext(), BlogListActivity.class), REQUEST_BLOG);
             }
         });
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(new ItemRefreshListener());
+
         askUserChatHistory();
     }
 
@@ -145,11 +155,10 @@ public class ConversionActivity extends BaseActivity {
         } else {
             threadId = mUser.getThreadId();
         }
-
         // fire event bus event to the service
         // SocketManager.getInstance().emitEvent(Constants.EMIT_CHAT_USER_HISTORY,threadId,mUsername,mUser.getUserId());
         if (mEventBus != null) {
-            mEventBus.post(new AskUserHistoryEvent().setThreadId(threadId).setFromUserId(mUsername).setToUserID(String.valueOf(mUser.getUserId())));
+            mEventBus.post(new AskUserHistoryEvent().setThreadId(threadId).setFromUserId(mUsername).setOffset(String.valueOf(offsetcounter)).setToUserID(String.valueOf(mUser.getUserId())));
         }
     }
 
@@ -191,8 +200,8 @@ public class ConversionActivity extends BaseActivity {
         mInputMessageView.setText("");
     }
 
-    private void sendBlogMessage(String blogId){
-        Log.d(TAG,String.format("Conversation#sendBlogMsg#%s",blogId));
+    private void sendBlogMessage(String blogId) {
+        Log.d(TAG, String.format("Conversation#sendBlogMsg#%s", blogId));
         mEventBus.post(new SendChatEvent().setMessage(blogId)
                 .setFromUserId(String.valueOf(mUser.getUserId()))
                 .setToUserId(mUsername).setMsgType("1").setThreadId(mUser.getThreadId()));
@@ -200,7 +209,15 @@ public class ConversionActivity extends BaseActivity {
 
     @Subscribe
     public void setOnReceiveMessage(ReceiveMsgEvent receiveMessage) {
-        if (receiveMessage.hasMessages()) {
+        // when we receive any message we dismiss the pull to refresh
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+        if (receiveMessage.hasMessages())
+        {
             if (receiveMessage.getMessageType() == 0) {
                 Log.d(TAG, "Chat Message");
             } else if (receiveMessage.getMessageType() == 1) {
@@ -218,4 +235,19 @@ public class ConversionActivity extends BaseActivity {
         }
     }
 
+    public class ItemRefreshListener implements SwipeRefreshLayout.OnRefreshListener{
+
+        @Override
+        public void onRefresh() {
+            // Refresh items
+            Log.d(TAG, String.format("Conversation#onRefresh"));
+            refreshItems();
+        }
+
+        void refreshItems() {
+            Log.d(TAG, String.format("Conversation#refreshItems"));
+            offsetcounter = offsetcounter + 50;
+            askUserChatHistory();
+        }
+    }
 }

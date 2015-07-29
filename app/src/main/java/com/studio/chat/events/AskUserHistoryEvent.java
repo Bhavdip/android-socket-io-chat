@@ -5,6 +5,7 @@ public class AskUserHistoryEvent {
     private String threadId;
     private String fromUserId;
     private String toUserID;
+    private String offset;
 
     public AskUserHistoryEvent(){
 
@@ -34,6 +35,15 @@ public class AskUserHistoryEvent {
 
     public AskUserHistoryEvent setToUserID(String toUserID) {
         this.toUserID = toUserID;
+        return this;
+    }
+
+    public String getOffset() {
+        return offset;
+    }
+
+    public AskUserHistoryEvent setOffset(String offset) {
+        this.offset = offset;
         return this;
     }
 }
