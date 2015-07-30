@@ -23,6 +23,7 @@ import com.studio.chat.adapter.MessageAdapter;
 import com.studio.chat.events.AskUserHistoryEvent;
 import com.studio.chat.events.ReceiveMsgEvent;
 import com.studio.chat.events.SendChatEvent;
+import com.studio.chat.events.SocketEvent;
 import com.studio.chat.model.Message;
 import com.studio.chat.model.User;
 import com.studio.chat.utility.Constants;
@@ -30,6 +31,7 @@ import com.studio.chat.utility.Prefrence;
 import com.studio.chat.utility.SocketManager;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -164,6 +166,7 @@ public class ConversionActivity extends BaseActivity {
 
     private void addAllMessage(final List<Message> messages) {
         updateUserModel(messages.get(0).getThreadId());
+        Collections.reverse(messages);
         mAdapter.addMessages(messages);
         runOnUiThread(new Runnable() {
             @Override
@@ -174,8 +177,8 @@ public class ConversionActivity extends BaseActivity {
         });
     }
 
-    private void addSingleMessage(Message nwMessage) {
-        mAdapter.addMessages(nwMessage);
+    private void addSingleMessage(final List<Message> messages) {
+        mAdapter.addSingleMessage(messages);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -207,28 +210,6 @@ public class ConversionActivity extends BaseActivity {
                 .setToUserId(mUsername).setMsgType("1").setThreadId(mUser.getThreadId()));
     }
 
-    @Subscribe
-    public void setOnReceiveMessage(ReceiveMsgEvent receiveMessage) {
-        // when we receive any message we dismiss the pull to refresh
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
-        if (receiveMessage.hasMessages())
-        {
-            if (receiveMessage.getMessageType() == 0) {
-                Log.d(TAG, "Chat Message");
-            } else if (receiveMessage.getMessageType() == 1) {
-                Log.d(TAG, "Ack Message");
-            } else {
-                Log.d(TAG, "Chat History Message");
-            }
-            addAllMessage(receiveMessage.receiveMessages());
-        }
-    }
-
     private void updateUserModel(String threadId) {
         if (mUser != null) {
             mUser.setThreadId(threadId);
@@ -248,6 +229,50 @@ public class ConversionActivity extends BaseActivity {
             Log.d(TAG, String.format("Conversation#refreshItems"));
             offsetcounter = offsetcounter + 50;
             askUserChatHistory();
+        }
+    }
+
+
+    @Subscribe
+    public void setOnReceiveMessage(ReceiveMsgEvent receiveMessage) {
+        // when we receive any message we dismiss the pull to refresh
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+        if (receiveMessage.hasMessages())
+        {
+            if (receiveMessage.getMessageType() == 0) {
+                Log.d(TAG, "Conversation#Chat Message");
+                addAllMessage(receiveMessage.receiveMessages());
+            } else if (receiveMessage.getMessageType() == 1) {
+                Log.d(TAG, "Conversation#AckMessage");
+                addSingleMessage(receiveMessage.receiveMessages());
+            } else {
+                Log.d(TAG, "Conversation#ChatHistoryMessage");
+                addAllMessage(receiveMessage.receiveMessages());
+            }
+
+        }
+    }
+
+    @Subscribe
+    public void onEventBackgroundThread(final SocketEvent socketEvent){
+        if(socketEvent != null){
+            if(socketEvent.getEventCode() == 200){
+                if(!TextUtils.isEmpty(socketEvent.getMessage())){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            Toast.makeText(ConversionActivity.this, String.valueOf(socketEvent.getMessage()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }
+            }
         }
     }
 }

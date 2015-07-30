@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/blog_right"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <!-- First Row -->
@@ -10,32 +10,32 @@
 
     <!-- Second Row -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/sender_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.1">
+            android:layout_margin="2dp"
+            android:text="@string/app_name"
+            android:textColor="@color/gray_user_name"
+            android:textSize="8dp"
+            android:textStyle="italic" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/sender"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3">
-
-            <TextView
-                android:id="@+id/sender"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:text="@string/app_name"
-                android:textColor="@color/username8"
-                android:textSize="12dp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
+            android:layout_margin="2dp"
+            android:singleLine="true"
+            android:text="@string/app_name"
+            android:textColor="@color/username8"
+            android:textSize="8dp"
+            android:textStyle="italic" />
 
     </LinearLayout>
 </LinearLayout>

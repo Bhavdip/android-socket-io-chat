@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studio.chat.R;
+import com.studio.chat.events.ReceiveMsgEvent;
+import com.studio.chat.model.Message;
 import com.studio.chat.utility.EmptyRecyclerView;
 import com.studio.chat.utility.ParseFromJsonCommand;
 import com.studio.chat.utility.RecyclerItemClickListener;
@@ -19,6 +21,8 @@ import com.studio.chat.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
 
 public class UserListActivity extends BaseActivity {
@@ -29,7 +33,7 @@ public class UserListActivity extends BaseActivity {
     public final static String KEY_USER_NAME = "username";
     public final static int REQUEST_LOGIN = 1;
 
-
+    private EventBus mEventBus = EventBus.getDefault();
     private List<User> mUserList = new ArrayList<>();
     private TextView mTextViewUserName;
     private String mUsername;
@@ -41,7 +45,6 @@ public class UserListActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users_list);
-
 
         mTextViewUserName = (TextView) findViewById(R.id.textview_userName);
         mTextViewUserName.setText("");
@@ -80,6 +83,18 @@ public class UserListActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mEventBus.register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mEventBus.unregister(this);
+    }
+
+    @Override
     protected void onDestroy() {
         //Prefrence.updateCurrentUser(getApplicationContext(), null);
         Log.d(TAG, "BaseActivity#updateCurrentUser#null");
@@ -115,6 +130,41 @@ public class UserListActivity extends BaseActivity {
             mTextViewUserName.setText(mUsername);
             mUserAdapter.addAllUsers(mUserList);
 
+        }
+    }
+
+    @Subscribe
+    public void setOnReceiveMessage(ReceiveMsgEvent receiveMessage) {
+        if (receiveMessage.hasMessages())
+        {
+            if (receiveMessage.getMessageType() == 0) {
+                Log.d(TAG, "UserListActivity#Chat Message");
+            } else if (receiveMessage.getMessageType() == 1) {
+                Log.d(TAG, "UserListActivity#Ack Message");
+            } else {
+                Log.d(TAG, "UserListActivity#Chat History Message");
+            }
+
+            for(Message message : receiveMessage.receiveMessages()){
+                for (int i = 0; i < mUserList.size(); i++) {
+                    User tempUser = mUserList.get(i);
+                    if (message.getUserId().equals(mUserList.get(i).getUserId())) {
+                        int unreadMsg = tempUser.getUnreadMsg();
+                        unreadMsg++;
+                        tempUser.setUnreadMsg(unreadMsg);
+                        tempUser.setLastMsg(message.getMsgText());
+                        mUserList.add(i,tempUser);
+                        break;
+                    }
+                }
+            }
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mUserAdapter.notifyDataSetChanged();
+                }
+            });
         }
     }
 }

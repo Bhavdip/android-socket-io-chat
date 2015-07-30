@@ -14,8 +14,11 @@ import com.squareup.picasso.Picasso;
 import com.studio.chat.R;
 import com.studio.chat.model.Message;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -23,7 +26,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public final String TAG = MessageAdapter.class.getSimpleName();
 
-    private List<Message> mMessages = new ArrayList<>();
+    private ArrayList<Message> mMessages = new ArrayList<>();
+
     private Context mContext;
     private String mUsername;
 
@@ -37,11 +41,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
     public void addMessages(List<Message> messageList) {
+        ArrayList<Message> tempList = new ArrayList<>(mMessages);
+        mMessages.clear();
         mMessages.addAll(messageList);
+        mMessages.addAll(tempList);
     }
 
-    public void addMessages(Message newMessage) {
-        mMessages.add(newMessage);
+    public void addSingleMessage(List<Message> messageList) {
+        ArrayList<Message> tempList = new ArrayList<>(mMessages);
+        mMessages.clear();
+        mMessages.addAll(tempList);
+        mMessages.addAll(messageList);
     }
 
     @Override
@@ -96,6 +106,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             TextView textViewUserName;
             TextView textViewMessage;
             ImageView imageViewProfile;
+            TextView textSenderTimer;
+            TextView textReceiverTimer;
+            TextView text_msg_status;
 
             if (message.getUserId() == Integer.parseInt(mUsername)) {
                 // right side ( Send the message)
@@ -104,14 +117,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
                 textViewUserName = (TextView) mItemView.findViewById(R.id.sender);
                 textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_right);
+                textSenderTimer = (TextView)mItemView.findViewById(R.id.sender_time);
+                text_msg_status = (TextView)mItemView.findViewById(R.id.sender_msg_status);
 
                 textViewMessage.setText(message.getMsgText());
                 textViewUserName.setText(message.getUserName());
+                textSenderTimer.setText(message.getMsgTime());
+                if(message.getMsgFlag() == Message.TYPE_MESSAGE)
+                {
+                    text_msg_status.setText("2");
+                }
+
             } else {
                 // Left side ( Receive the message)
                 (mItemView.findViewById(R.id.message_left)).setVisibility(View.VISIBLE);
                 (mItemView.findViewById(R.id.message_right)).setVisibility(View.GONE);
 
+                textReceiverTimer = (TextView)mItemView.findViewById(R.id.receiver_time);
                 textViewUserName = (TextView) mItemView.findViewById(R.id.receiver);
                 textViewMessage = (TextView) mItemView.findViewById(R.id.textview_message_left);
                 textViewMessage.setText(message.getMsgText());
@@ -123,6 +145,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 if (!TextUtils.isEmpty(message.getProfilePic())) {
                     picasso.load(message.getProfilePic()).placeholder(R.drawable.user).into(imageViewProfile);
                 }
+                textReceiverTimer.setText(message.getMsgTime());
             }
         }
 
@@ -132,6 +155,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             TextView txtusername;
             TextView txtblogtitle;
             TextView txtblogdesc;
+            TextView textSenderTimer;
+            TextView textReceiverTimer;
 
             final Picasso picasso = Picasso.with(getApplicationContext());
             picasso.setLoggingEnabled(true);
@@ -146,10 +171,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 txtblogtitle = (TextView) mItemView.findViewById(R.id.blog_title_right);
                 txtblogdesc = (TextView) mItemView.findViewById(R.id.blog_description_right);
                 imageViewblog = (ImageView) mItemView.findViewById(R.id.blog_profile_right);
+                textSenderTimer = (TextView)mItemView.findViewById(R.id.sender_time);
 
                 txtusername.setText(message.getUserName());
                 txtblogtitle.setText(message.getBlogTitle());
                 txtblogdesc.setText(message.getBlogDesc());
+                textSenderTimer.setText(message.getMsgTime());
 
                 if (!TextUtils.isEmpty(message.getBlogImage())) {
                     picasso.load(message.getBlogImage()).placeholder(R.drawable.ic_launcher).into(imageViewblog);
@@ -166,11 +193,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 txtblogtitle = (TextView) mItemView.findViewById(R.id.blog_title_left);
                 txtblogdesc = (TextView) mItemView.findViewById(R.id.blog_description_left);
                 imageViewblog = (ImageView) mItemView.findViewById(R.id.blog_profile_left);
+                textReceiverTimer = (TextView)mItemView.findViewById(R.id.receiver_time);
 
                 txtusername.setText(message.getUserName());
                 txtblogtitle.setText(message.getBlogTitle());
                 txtblogdesc.setText(message.getBlogDesc());
-
+                textReceiverTimer.setText(message.getMsgTime());
                 if (!TextUtils.isEmpty(message.getBlogImage())) {
                     picasso.load(message.getBlogImage()).placeholder(R.drawable.ic_launcher).into(imageViewblog);
                 }

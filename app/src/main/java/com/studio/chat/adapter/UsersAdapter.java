@@ -90,7 +90,9 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             mUserid.setText(String.valueOf(user.getUserId()));
             mUsernameView.setText(user.getUserName());
             mUnreadMessage.setText(String.valueOf(user.getUnreadMsg()));
+
             mLastMessage.setText(user.getLastMsg());
+
             if (!TextUtils.isEmpty(user.getLastMsgTime())) {
 
                 DateFormat format = new SimpleDateFormat("yyyy-mm-dd", Locale.JAPAN);

@@ -3,9 +3,9 @@ package com.studio.chat.events;
 public class SocketEvent{
 
     private int eventCode;
+    private String message;
 
     public SocketEvent(){
-
     }
 
     public int getEventCode() {
@@ -17,5 +17,12 @@ public class SocketEvent{
         return this;
     }
 
+    public String getMessage() {
+        return message;
+    }
 
+    public SocketEvent setMessage(String message) {
+        this.message = message;
+        return this;
+    }
 }

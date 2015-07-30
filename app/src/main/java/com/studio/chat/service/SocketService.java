@@ -7,12 +7,14 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.Socket;
 import com.studio.chat.events.AddUserEvent;
 import com.studio.chat.events.AskUserBlogLike;
 import com.studio.chat.events.AskUserHistoryEvent;
 import com.studio.chat.events.ReceiveMsgEvent;
 import com.studio.chat.events.SendChatEvent;
+import com.studio.chat.events.SocketEvent;
 import com.studio.chat.events.UserBlogLike;
 import com.studio.chat.events.UserLoginEvent;
 import com.studio.chat.utility.Constants;
@@ -158,7 +160,7 @@ public class SocketService extends Service {
         @Override
         public void call(Object... args) {
             String result = (String) args[0];
-            Log.d(TAG, String.format("Login :%s", result));
+            Log.d(TAG, String.format("SocketService#Response[Login :%s]", result));
             // we receiver the users list here
             mEventBus.post(new UserLoginEvent().setUserList(result));
         }
@@ -222,8 +224,8 @@ public class SocketService extends Service {
 
     @Subscribe
     public void sendChatMessage(SendChatEvent sendChatEvent){
-        Log.d(TAG, String.format("SocketService#Emit#sendChatMessage[FmId:%s],[ToId:%s]",
-                sendChatEvent.getFromUserId(),sendChatEvent.getToUserId()));
+        Log.d(TAG, String.format("SocketService#Emit#sendChatMessage[FmId:%s],[ToId:%s],[ThreadId:%s]",
+                sendChatEvent.getFromUserId(),sendChatEvent.getToUserId(), sendChatEvent.getThreadId()));
 
         SocketManager.getInstance().emitEvent(Constants.NODE_SEND_CHAT_MESSAGE,
                 sendChatEvent.getMessage(),
@@ -248,7 +250,14 @@ public class SocketService extends Service {
                 userHistoryEvent.getThreadId(),
                 userHistoryEvent.getFromUserId(),
                 userHistoryEvent.getToUserID(),
-                userHistoryEvent.getOffset());
+                userHistoryEvent.getOffset(), new Ack() {
+                    @Override
+                    public void call(Object... args) {
+                        String arg = (String) args[0];
+                        Log.d(TAG, String.format("SocketService#Emit#askChatHistory#%s",arg));
+                        mEventBus.post(new SocketEvent().setEventCode(200).setMessage(arg));
+                    }
+                });
     }
 
     @Subscribe
